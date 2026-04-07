@@ -35,7 +35,7 @@ def init_vertex():
 # =============================
 # MODEL (GIỮ NGUYÊN)
 # =============================
-model = GenerativeModel("gemini-2.5-flash")
+
 
 
 # =============================
@@ -44,7 +44,7 @@ model = GenerativeModel("gemini-2.5-flash")
 def detect_emotion(message):
 
     init_vertex()  # 🔥 THÊM DUY NHẤT DÒNG NÀY
-
+    model = GenerativeModel("gemini-2.5-flash")
     prompt = f"""
 Bạn là AI phân tích cảm xúc người dùng.
 
