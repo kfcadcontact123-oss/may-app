@@ -9,3 +9,5 @@ Pillow
 dj-database-url
 cloudinary
 django-cloudinary-storage
+google-cloud-texttospeech
+google-auth
