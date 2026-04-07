@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="chat-page">
+
+    <div class="chat-page-wrapper">
+        {% include "chat/chat_box.html" with messages=messages %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Tâm Lý</title>
+    {% load static %}
+
+    <link rel="icon" type="image/png" href="{% static 'images/favicon_v2.png' %}?v=2">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+
+    <script defer src="{% static 'js/chat.js' %}"></script>
+    <script defer src="{% static 'js/stress_board.js' %}"></script>
+</head>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".toggle-password").forEach(icon => {
+        icon.addEventListener("click", function () {
+
+            const wrapper = this.closest(".password-field");
+            const input = wrapper.querySelector("input");
+
+            if (input.type === "password") {
+                input.type = "text";
+                this.textContent = "🙈";
+            } else {
+                input.type = "password";
+                this.textContent = "👁";
+            }
+
+        });
+    });
+});
+    </script>
+<body>
+
+<nav class="main-nav">
+
+    <!-- LEFT -->
+    <div class="nav-left">
+        <a href="/" class="nav-btn nav-home">Trang Chủ</a>
+        <a href="/chat/" class="nav-btn nav-chat">Mây</a>
+        <a href="/feedback/" class="nav-btn nav-feedback">Góp Ý</a>
+        <a href="{% url 'profile' %}" class="nav-btn nav-text">Trang Cá Nhân</a>
+        <a href="{% url 'settings' %}" class="nav-btn nav-text">Cài Đặt</a>
+        <a href="{% url 'about' %}" class="nav-btn nav-text">Giới Thiệu</a>
+        <a href="/donate/" class="nav-btn nav-text">Ủng hộ</a>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="nav-right" style="position:relative; z-index:9999; display:flex; gap:10px; align-items:center;">
+
+        <!-- 🔔 NOTIFICATION -->
+        <div class="notif-wrapper">
+    <button class="notif-btn" onclick="toggleNotif()">
+        🔔 Thông báo
+        {% if unread_count > 0 %}
+    <span class="notif-badge">{{ unread_count }}</span>
+{% endif %}
+    </button>
+
+    <div class="notif-dropdown" id="notifDropdown">
+    {% for n in notifications %}
+        <div class="notif-item {% if not n.is_read %}unread{% endif %}">
+
+            <span>{{ n.content }}</span>
+
+            <div style="display:flex; gap:6px; margin-top:6px">
+
+                {% if n.type == "stress" %}
+                    <div class="notif-item">
+    <span>{{ notif.content }}</span>
+
+    {% if notif.url %}
+        <a href="{{ notif.url }}" class="view-btn">
+            Xem chi tiết →
+        </a>
+    {% endif %}
+</div>
+                {% endif %}
+
+                <button onclick="deleteNotif({{ n.id }})">❌</button>
+
+            </div>
+        </div>
+    {% empty %}
+        <p>Không có thông báo</p>
+    {% endfor %}
+</div>
+</div>
+
+        <!-- LOGOUT -->
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="nav-btn nav-logout">
+                Đăng xuất
+            </button>
+        </form>
+
+    </div>
+
+</nav>
+
+{% block content %}{% endblock %}
+
+<!-- =========================
+     JS
+========================= -->
+
+<script>
+/* click ra ngoài thì đóng */
+document.addEventListener("click", function(e){
+    const box = document.getElementById("notifDropdown");
+    const btn = document.querySelector(".notif-btn");
+
+    if(!box.contains(e.target) && !btn.contains(e.target)){
+        box.classList.remove("show");
+    }
+});
+
+/* xử lý accept / decline */
+function handleNotif(id, action){
+
+    fetch(`/notifications/${action}/${id}/`, {
+        method: "POST",
+        headers:{
+            "X-CSRFToken": getCSRFToken()
+        }
+    })
+    .then(res => res.json())
+    .then(() => {
+        const el = document.querySelector(`[data-id="${id}"]`);
+        if(el) el.remove();
+    })
+};
+
+function getCSRFToken(){
+    return document.querySelector('[name=csrfmiddlewaretoken]').value
+};
+document.addEventListener("input", function(e){
+    if(e.target.matches(".reply-form textarea")){
+        e.target.style.height = "auto";
+        e.target.style.height = e.target.scrollHeight + "px";
+    }
+});
+</script>
+<script>
+/* =========================
+   REALTIME NOTIFICATION (POLLING)
+========================= */
+
+let lastNotifCount = {{ unread_count|default:0 }};
+
+/* 🔄 fetch notif */
+function fetchNotifications(){
+
+    fetch("/accounts/notif/api/")
+    .then(res => res.json())
+    .then(data => {
+
+        const dropdown = document.getElementById("notifDropdown");
+        const badge = document.querySelector(".notif-badge");
+        const btn = document.querySelector(".notif-btn");
+
+        // =========================
+        // UPDATE BADGE
+        // =========================
+        if(data.unread > 0){
+            if(!badge){
+                const span = document.createElement("span");
+                span.className = "notif-badge";
+                span.innerText = data.unread;
+                btn.appendChild(span);
+            }else{
+                badge.innerText = data.unread;
+            }
+        }else{
+            if(badge) badge.remove();
+        }
+
+        // =========================
+        // UPDATE DROPDOWN
+        // =========================
+        dropdown.innerHTML = "";
+
+        if(data.notifications.length === 0){
+            dropdown.innerHTML = "<p>Không có thông báo</p>";
+            return;
+        }
+
+        data.notifications.forEach(n => {
+
+            const div = document.createElement("div");
+            div.className = "notif-item " + (n.is_read ? "" : "unread");
+            div.id = "notif-" + n.id;
+            let html = `<span onclick="goNotif('${n.url}', ${n.id})" style="cursor:pointer">
+                ${n.content}
+            </span>
+            <div style="display:flex; gap:6px; margin-top:6px">`;
+
+            html += `<a href="/accounts/notif/${n.id}/" class="btn-view">
+                Xem chi tiết
+             </a>`;
+
+            html += `<button class="btn-delete" onclick="deleteNotif(${n.id})">
+            Xóa
+         </button>`;
+
+            div.innerHTML = html;
+            dropdown.appendChild(div);
+        });
+
+    });
+}
+
+/* =========================
+   AUTO POLL (3s/lần)
+========================= */
+setInterval(fetchNotifications, 3000);
+
+
+/* =========================
+   OVERRIDE DELETE (KHÔNG RELOAD)
+========================= */
+function deleteNotif(id){
+    fetch(`/accounts/notif/delete/${id}/`)
+    .then(() => {
+
+        const el = document.getElementById(`notif-${id}`);
+        if(el) el.remove();
+
+        // 🔥 cập nhật badge luôn
+        fetchNotifications();
+    });
+}
+
+
+/* =========================
+   OVERRIDE OPEN (MARK READ)
+========================= */
+function toggleNotif(){
+    const box = document.getElementById("notifDropdown");
+    box.classList.toggle("show");
+
+    fetch("/accounts/notif/read-all/")
+        .then(() => {
+            const badge = document.querySelector(".notif-badge");
+            if (badge) badge.remove();
+        });
+};
+function goNotif(url, id){
+
+    fetch(`/accounts/notif/read-all/`) // mark read all
+
+    if(url){
+        setTimeout(() => {
+            window.location.href = url;
+        }, 100);
+    }
+}
+</script>
+</body>
+</html>

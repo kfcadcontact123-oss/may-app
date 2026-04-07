@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="donate-container">
+
+    <!-- HERO -->
+    <div class="donate-hero">
+        <h1>Ủng hộ Mây </h1>
+        <p>
+            Nếu Mây đã giúp bạn cảm thấy nhẹ lòng hơn một chút,
+            bạn có thể ủng hộ để Mây tiếp tục đồng hành nhé.
+        </p>
+    </div>
+
+    <!-- MAIN -->
+    <div class="donate-grid">
+
+        <!-- LEFT -->
+        <div class="donate-card">
+            <h2> Vì sao nên ủng hộ?</h2>
+
+            <ul>
+                <li>Duy trì server và hệ thống AI</li>
+                <li>Cải thiện trải nghiệm và độ mượt</li>
+                <li>Phát triển thêm tính năng mới</li>
+            </ul>
+
+            <div class="donate-note">
+                Mỗi sự ủng hộ nhỏ đều có ý nghĩa rất lớn để giúp Mây hoàn thiện hơn nữa
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="donate-card center">
+
+            <h2>Quét mã để ủng hộ tại đây nhé</h2>
+
+            <div class="qr-box">
+                <!-- 👉 thay bằng ảnh QR của bạn -->
+                <img src="/static/images/qr2.png" alt="QR donate">
+            </div>
+
+            <div class="bank-info">
+                <p><b>Ngân hàng:</b> MB Bank</p>
+                <p><b>Chủ tài khoản:</b> Nguyễn Việt Khánh</p>
+                <p><b>Số tài khoản:</b> 0123456789</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="donate-footer">
+        <p>
+            Nếu như bạn ủng hộ, dù ít hay nhiều, thì Mây cũng sẽ biết ơn bạn nhiều lắm.
+        </p>
+    </div>
+
+</div>
+
+<style>
+
+.donate-container{
+    max-width:900px;
+    margin:40px auto;
+    padding:0 20px;
+}
+
+/* HERO */
+
+.donate-hero{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.donate-hero h1{
+    font-size:28px;
+    margin-bottom:10px;
+}
+
+.donate-hero p{
+    color:#475569;
+}
+
+/* GRID */
+
+.donate-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+@media(max-width:768px){
+    .donate-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+/* CARD */
+
+.donate-card{
+    background: linear-gradient(135deg, #f8fafc, #eef2ff);
+    border-radius:16px;
+    padding:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.06);
+}
+
+.donate-card h2{
+    margin-bottom:12px;
+}
+
+/* LEFT */
+
+.donate-card ul{
+    padding-left:18px;
+    margin-bottom:15px;
+}
+
+.donate-note{
+    font-size:14px;
+    color:#64748b;
+}
+
+/* RIGHT */
+
+.center{
+    text-align:center;
+}
+
+.qr-box{
+    margin:15px 0;
+}
+
+.qr-box img{
+    width:200px;
+    border-radius:12px;
+    box-shadow:0 6px 16px rgba(0,0,0,0.1);
+}
+
+/* BANK */
+
+.bank-info p{
+    margin:4px 0;
+    font-size:14px;
+}
+
+/* FOOTER */
+
+.donate-footer{
+    margin-top:30px;
+    text-align:center;
+    font-size:14px;
+    color:#64748b;
+}
+
+</style>
+
+{% endblock %}

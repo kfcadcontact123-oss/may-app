@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="profile-card">
+
+    <div class="profile-header">
+
+        <div class="avatar big">
+            {% if profile_user.usermemory.avatar %}
+                <img src="{{ profile_user.usermemory.avatar.url }}" class="avatar-img">
+            {% else %}
+                {{ profile_user.username|first|upper }}
+            {% endif %}
+        </div>
+
+        <div>
+            <h2>{{ profile_user.username }}</h2>
+            <div class="profile-badges">
+    {% if profile_user.is_superuser %}
+        <span class="badge dev">Developer</span>
+    {% endif %}
+
+    {% if profile_user.is_staff %}
+        <span class="badge mod">Moderator</span>
+    {% endif %}
+</div>
+        </div>
+    </div>
+
+    <div class="profile-info">
+
+        <div class="info-row">
+            <span>Username:</span>
+            <b>{{ profile_user.username }}</b>
+        </div>
+
+        <div class="info-row">
+            <span>Email:</span>
+            {% if request.user.id == profile_user.id %}
+    <b>{{ profile_user.email }}</b>
+{% else %}
+    <b>
+        {{ profile_user.email|slice:":3" }}***@***
+    </b>
+{% endif %}
+        </div>
+
+        <div class="info-row">
+            <span>Tuổi:</span>
+            <b>{{ profile_user.usermemory.age }}</b>
+        </div>
+
+        <div class="info-row">
+            <span>Nghề:</span>
+            <b>{{ profile_user.usermemory.job }}</b>
+        </div>
+
+        <div class="info-row">
+            <span>Nơi ở:</span>
+            <b>{{ profile_user.usermemory.get_location_display }}</b>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

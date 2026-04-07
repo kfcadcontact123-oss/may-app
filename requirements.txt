@@ -1,0 +1,9 @@
+Django
+gunicorn
+google-cloud-aiplatform
+python-dotenv
+psycopg2-binary
+aiohttp
+whitenoise
+Pillow
+dj-database-url

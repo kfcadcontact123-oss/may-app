@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="settings-container">
+
+    <div class="card settings-card">
+
+        <!-- HEADER -->
+        <div class="settings-header">
+            <h2>Cài đặt tài khoản</h2>
+            <p>Quản lý thông tin cá nhân của bạn</p>
+        </div>
+
+        <!-- =========================
+             FORM SETTINGS
+        ========================= -->
+        <form method="post" class="settings-form">
+            {% csrf_token %}
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tên tài khoản</label>
+                    <input name="username" value="{{ user.username }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input name="email" value="{{ user.email }}">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tuổi</label>
+                    <input name="age" value="{{ memory.age }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Nghề nghiệp</label>
+                    <input name="job" value="{{ memory.job }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Vị trí</label>
+                <select name="location">
+                    {% for value, label in locations %}
+                        <option value="{{ value }}"
+                            {% if memory.location == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="save-btn">Lưu thay đổi</button>
+        </form>
+
+        <div class="divider"></div>
+
+        <!-- PASSWORD -->
+        <div class="settings-section">
+            <a href="{% url 'change_password' %}" class="link-btn">
+                Đổi mật khẩu
+            </a>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- AVATAR -->
+        <div class="settings-section">
+            <h3>Đổi avatar</h3>
+
+            <!-- ✅ FIX: bỏ hardcode -->
+            <form method="post" action="{% url 'upload_avatar' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="avatar-upload">
+
+                    <!-- ✅ FIX: tránh src rỗng -->
+                    {% if user.usermemory.avatar %}
+                        <img id="avatarPreview"
+                             src="{{ user.usermemory.avatar.url }}"
+                             class="avatar-preview">
+                    {% else %}
+                        <img id="avatarPreview"
+                             src="/static/default-avatar.png"
+                             class="avatar-preview">
+                    {% endif %}
+
+                    <div class="avatar-actions">
+                        <label for="avatarInput" class="upload-btn">
+                            Chọn ảnh
+                        </label>
+
+                        <input type="file" name="avatar" id="avatarInput" hidden required>
+
+                        <button type="submit" class="save-btn">
+                            Cập nhật avatar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- DANGER ZONE -->
+        <div class="settings-section danger-zone">
+            <h3>Vùng nguy hiểm</h3>
+
+            <!-- ✅ giữ nguyên logic -->
+            <button type="button" class="delete-btn" onclick="openDeleteModal()">
+                Xóa tài khoản
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- =========================
+     DELETE MODAL
+========================= -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <h3>Bạn chắc chắn muốn xóa tài khoản?</h3>
+        <p>
+            Việc xóa sẽ làm mất toàn bộ dữ liệu liên quan đến tài khoản này.
+        </p>
+
+        <div class="modal-actions">
+            <form method="POST" action="{% url 'delete_account' %}">
+                {% csrf_token %}
+                <button type="submit" class="confirm-btn">
+                    Tôi chắc chắn
+                </button>
+            </form>
+
+            <button type="button" onclick="closeDeleteModal()" class="cancel-btn">
+                Hủy
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- =========================
+     JS
+========================= -->
+<script>
+// avatar preview
+const input = document.getElementById("avatarInput");
+const preview = document.getElementById("avatarPreview");
+
+if (input) {
+    input.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+        }
+    });
+}
+
+// =========================
+// MODAL FIX CHUẨN (QUAN TRỌNG)
+// =========================
+function openDeleteModal() {
+    document.getElementById("deleteModal").classList.add("show");
+}
+
+function closeDeleteModal() {
+    document.getElementById("deleteModal").classList.remove("show");
+}
+
+// ✅ click ngoài để đóng
+window.onclick = function(e) {
+    const modal = document.getElementById("deleteModal");
+    if (e.target === modal) {
+        modal.classList.remove("show");
+    }
+};
+</script>
+
+<!-- =========================
+     TOAST
+========================= -->
+<div id="toast" class="toast">✔ Lưu thành công</div>
+
+{% if messages %}
+<script>
+    const toast = document.getElementById("toast");
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2500);
+</script>
+{% endif %}
+
+{% endblock %}

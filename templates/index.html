@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="app-layout">
+
+    <!-- LEFT -->
+    <aside class="left-panel card">
+        <form method="GET" class="search-bar-home">
+    <input name="q" placeholder="Tìm user...">
+    <button>Tìm kiếm</button>
+</form>
+    <h3>Người bạn có thể biết</h3>
+<div class="people-list">
+    {% for u in suggested_users %}
+        <div class="people-item">
+
+            <div class="avatar small">
+                {% if u.usermemory.avatar %}
+                    <img src="{{ u.usermemory.avatar.url }}?v={{ u.usermemory.avatar.name }}" class="avatar-img">
+                {% else %}
+                    {{ u.username|first|upper }}
+                {% endif %}
+            </div>
+
+            <div class="people-info">
+                <div class="name">{{ u.username }}</div>
+
+                <div class="meta">
+
+    {% if u.usermemory.age %}
+        Tuổi: {{ u.usermemory.age }}
+    {% endif %}
+
+    {% if u.usermemory.age and u.usermemory.job %}
+        &nbsp;&nbsp;
+    {% endif %}
+
+    {% if u.usermemory.job %}
+        Nghề: {{ u.usermemory.job }}
+    {% endif %}
+
+</div>
+
+                <div class="friend-actions" style="margin-top:6px; display:flex; gap:6px;">
+
+                    {% if u.friend_status == "friends" %}
+                        <span class="nav-btn">✔ Bạn bè</span>
+                        <a href="/chat/{{ u.id }}/" class="nav-btn nav-chat">Nhắn tin</a>
+
+                    {% elif u.friend_status == "sent" %}
+                        <span class="nav-btn">⏳ Đã gửi</span>
+                        <button onclick="handleFriendAction({{ u.id }}, 'cancel', this)">Huỷ</button>
+
+                    {% elif u.friend_status == "received" %}
+                        <button onclick="handleFriendAction({{ u.id }}, 'accept', this)">✔ Chấp nhận</button>
+                        <button onclick="handleFriendAction({{ u.id }}, 'decline', this)">✖ Từ chối</button>
+
+                    {% else %}
+    <a href="/profile/{{ u.id }}/" class="nav-btn view-profile-btn">
+        Xem trang cá nhân
+</a>
+{% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+    {% endfor %}
+</div>
+
+</aside>
+
+
+    <!-- CENTER -->
+    <main class="center-panel">
+
+        <!-- profile -->
+        <div class="card profile">
+
+            <div class="avatar">
+    {% if request.user.usermemory.avatar %}
+        <img src="{{ request.user.usermemory.avatar.url }}?v={{ request.user.usermemory.avatar.name }}" class="avatar-img">
+    {% else %}
+        {{ request.user.username|first|upper }}
+    {% endif %}
+</div>
+
+            <h2>{{ request.user.username }}</h2>
+            {% if special_care %}
+    <div class="alert-care">
+        ⚠️ Bạn đang có mức stress rất cao trong nhiều ngày.
+        Mây sẽ quan tâm bạn nhiều hơn nhé. 
+    </div>
+    {% endif %}
+            <p class="status">
+    Trạng thái tâm lý: <span class="status-text">
+    {% if stress_today < 50 %}
+        Thư giãn
+    {% elif stress_today < 70 %}
+        Ổn định
+    {% elif stress_today < 85 %}
+        Căng thẳng nhẹ
+    {% elif stress_today < 95 %}
+        Căng thẳng
+    {% else %}
+        Căng thẳng tột độ
+    {% endif %}
+</span>
+
+            <h3>Chỉ số Stress hôm nay</h3>
+
+            <div class="progress">
+                <div class="progress-bar"
+                     style="width: {{ stress_today }}%;">
+                </div>
+            </div>
+
+            <p><b>{{ stress_today }}/100</b></p>
+
+        </div>
+
+        <!-- chart -->
+        <div class="card chart-scroll">
+            <h2>Chỉ số stress theo ngày</h2>
+            <div class="stress-date">
+    <span id="today-day"></span>
+    •
+    <span id="today-date"></span>
+    —
+    Ngày thứ <span id="day-number"></span>
+</div>
+            <canvas id="stressChart"></canvas>
+        </div>
+
+    </main>
+
+
+    <!-- RIGHT -->
+    <aside class="right-panel">
+        <div id="chat-launcher">
+    {% include "chat/chat_box.html" %}
+</div>
+    </aside>
+
+</div>
+
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+let stressData = JSON.parse('{{ stress_data|escapejs }}');
+let stressLabels = JSON.parse('{{ stress_labels|escapejs }}');
+let avgData = JSON.parse('{{ avg_data|escapejs }}');
+
+/* =========================
+   ALIGN
+========================= */
+
+function rotateArray(arr, shift){
+    shift = ((shift % arr.length) + arr.length) % arr.length;
+    return arr.slice(shift).concat(arr.slice(0, shift));
+}
+
+function alignTodayCenter(labels, data, avg){
+
+    const today = new Date();
+    const todayStr =
+        String(today.getDate()).padStart(2,'0') + "/" +
+        String(today.getMonth()+1).padStart(2,'0');
+
+    const todayIndex = labels.indexOf(todayStr);
+
+    if(todayIndex === -1) return {labels,data,avg};
+
+    const CENTER_INDEX = 6;
+    const shift = todayIndex - CENTER_INDEX;
+
+    return {
+        labels: rotateArray(labels, shift),
+        data: rotateArray(data, shift),
+        avg: rotateArray(avg, shift)
+    };
+}
+
+const aligned = alignTodayCenter(stressLabels, stressData, avgData);
+
+stressLabels = aligned.labels;
+stressData   = aligned.data;
+avgData      = aligned.avg;
+
+/* =========================
+   DAY COUNT (FIX CHUẨN)
+========================= */
+
+let realData = stressData.filter(v => v !== null);
+
+document.getElementById("day-number").textContent = realData.length;
+
+/* =========================
+   PREDICTION
+========================= */
+
+const TOTAL_DAYS = 14;
+
+let predictionData = new Array(TOTAL_DAYS).fill(null);
+
+if(realData.length >= 2){
+
+    const n = realData.length;
+
+    let sumX=0,sumY=0,sumXY=0,sumXX=0;
+
+    for(let i=0;i<n;i++){
+        sumX+=i;
+        sumY+=realData[i];
+        sumXY+=i*realData[i];
+        sumXX+=i*i;
+    }
+
+    const slope=(n*sumXY - sumX*sumY)/(n*sumXX - sumX*sumX);
+
+    const last = realData[n-1];
+    const prev = realData[n-2];
+    const momentum = last - prev;
+
+    let startIndex = 6;
+
+    predictionData[startIndex] = last;
+
+    for(let i = startIndex + 1; i < TOTAL_DAYS; i++){
+
+        const prevPred = predictionData[i-1] ?? last;
+
+        let predicted =
+            prevPred +
+            slope*0.3 +
+            momentum*Math.exp(-(i-startIndex)*0.7) +
+            (50-prevPred)*0.05;
+
+        predicted = Math.max(20, Math.min(95, predicted));
+
+        predictionData[i] = Math.round(predicted);
+    }
+}
+
+const verticalLinePlugin = {
+    id: 'verticalLine',
+
+    afterDatasetsDraw: (chart) => {
+
+        const tooltip = chart.tooltip;
+
+        if (!tooltip || !tooltip.dataPoints || !tooltip.dataPoints.length) return;
+
+        const ctx = chart.ctx;
+        const x = tooltip.dataPoints[0].element.x;
+
+        const topY = chart.scales.y.top;
+        const bottomY = chart.scales.y.bottom;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([4,4]);
+        ctx.moveTo(x, topY);
+        ctx.lineTo(x, bottomY);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+        ctx.stroke();
+        ctx.restore();
+    }
+};
+
+/* =========================
+   CHART
+========================= */
+
+const chart = new Chart(document.getElementById("stressChart"), {
+    plugins: [verticalLinePlugin],
+    type:'line',
+    data:{
+        labels:stressLabels,
+        datasets:[
+            {
+                label:'Stress',
+                data:stressData,
+                spanGaps:true,
+                tension:0.4,
+                borderColor:'#3b82f6',
+                pointRadius:4,
+                pointHoverRadius:7
+            },
+            {
+                label:'Dự đoán',
+                data:predictionData,
+                spanGaps:true,
+                tension:0.4,
+                borderDash:[6,6],
+                borderColor:'#ef4444',
+                pointRadius:3,
+                pointHoverRadius:6
+            },
+            {
+                label:'Trung bình',
+                data:avgData,
+                spanGaps:true,
+                tension:0.4,
+                borderDash:[2,4],
+                borderColor:'#22c55e',
+                pointRadius:4,
+                pointHoverRadius:7,
+                pointBackgroundColor:'#22c55e'
+            }
+        ]
+    },
+
+    options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
+        interaction:{
+            mode:'index',
+            intersect:false,
+            axis:'x'
+        },
+
+        plugins:{
+            tooltip:{
+                enabled:true,
+                mode:'index',
+                intersect:false,
+
+                callbacks:{
+                    title:(items)=> items[0].label,
+
+                    label:(context)=>{
+                        if(context.raw === null) return "";
+
+                        if(context.dataset.label === "Dự đoán"){
+                            return "Dự đoán: " + context.raw;
+                        }
+
+                        if(context.dataset.label === "Trung bình"){
+                            return "Trung bình: " + context.raw;
+                        }
+
+                        return "Stress: " + context.raw;
+                    }
+                }
+            }
+        },
+
+        scales:{
+            y:{
+                beginAtZero:true,
+                max:100
+            }
+        }
+    }
+});
+
+
+});
+</script>
+
+<style>
+
+
+/* panels */
+
+.left-panel{
+    display:flex;
+    flex-direction:column;
+}
+
+.center-panel{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+.right-panel{
+    display:flex;
+    flex-direction:column;
+}
+
+/* cards */
+
+.card{
+    background:white;
+    border-radius:14px;
+    padding:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+.app-layout .chatbot{
+    height:100%;
+}
+</style>
+<script>
+function handleFriendAction(userId, action, el){
+    fetch(`/accounts/${action}/${userId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCSRFToken()
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        updateUI(el, userId, data.status)
+    })
+}
+
+function updateUI(el, userId, status){
+    const container = el.closest(".people-item")
+
+    let html = ""
+
+    if(status === "friends"){
+        html = `
+            <span class="nav-btn">✔ Bạn bè</span>
+            <a href="/chat/${userId}/" class="nav-btn nav-chat">Nhắn tin</a>
+        `
+    }
+    else if(status === "sent"){
+        html = `
+            <span class="nav-btn">⏳ Đã gửi</span>
+            <button onclick="handleFriendAction(${userId}, 'cancel', this)" class="nav-btn">Huỷ</button>
+        `
+    }
+    else if(status === "none"){
+    html = `
+        <a href="/profile/${userId}/" class="nav-btn">👤 Xem trang cá nhân</a>
+    `
+}
+
+    el.parentElement.innerHTML = html
+}
+
+function getCSRFToken(){
+    return document.querySelector('[name=csrfmiddlewaretoken]').value
+}
+</script>
+{% endblock %}

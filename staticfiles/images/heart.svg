@@ -1,0 +1,11 @@
+<svg class="heart-soft" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <path d="
+    M32 54
+    C32 54, 10 36, 10 22
+    C10 14, 16 10, 22 10
+    C28 10, 31 14, 32 18
+    C33 14, 36 10, 42 10
+    C48 10, 54 14, 54 22
+    C54 36, 32 54, 32 54
+  " fill="#FF6B8A"></path>
+</svg>

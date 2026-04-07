@@ -1,0 +1,49 @@
+{% load static %}
+<div class="card chatbot" id="chat-widget">
+
+    <!-- HEADER -->
+    <div class="chat-header">
+        <div class="may-avatar-wrapper">
+        <img src="{% static 'images/may_avatar_v2.png' %}" alt="Avatar Mây" class="may-avatar">
+    </div>
+
+        <div class="chat-info">
+            <h3>Mây</h3>
+            <span class="status">đang online</span>
+        </div>
+    </div>
+    
+    <!-- CHAT AREA -->
+    <div id="chat-box" class="chat-messages">
+
+        <!-- welcome message -->
+        {% for m in messages %}
+    <div class="message user">
+        {{ m.message }}
+    </div>
+
+    <div class="message bot">
+        {{ m.response }}
+        <button 
+        class="voice-btn" data-text="{{ m.response|escape }}">
+        🔊Nghe
+    </button>
+    </div>
+{% empty %}
+    <div class="message bot">
+        Chào bạn 🙂 Mình là Mây. Hôm nay bạn thấy thế nào?
+    </div>
+{% endfor %}
+
+    </div>
+    <div class="chat-input-area">
+<textarea
+    id="chat-input"
+    placeholder="Nhắn tin cho Mây..."
+    rows="1">
+</textarea>
+<button id="send-btn">
+        Gửi
+    </button>
+    </div>
+</div>

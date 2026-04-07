@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="stress-detail-container">
+
+    <!-- CARD -->
+    <div class="stress-card">
+
+        <h2 class="title">Hôm nay của bạn thế nào rồi nhỉ?</h2>
+
+        <!-- SCORE -->
+        <div class="score-box">
+            <div class="score-number">{{ stress.score }}</div>
+            <div class="score-label">/100</div>
+        </div>
+
+        <!-- DIFF -->
+        {% if diff is not None %}
+        <div class="diff-box
+            {% if diff > 0 %}increase
+            {% elif diff < 0 %}decrease
+            {% else %}stable
+            {% endif %}
+        ">
+            {% if diff > 0 %}
+                Hôm nay có vẻ bạn đang chịu thêm một chút áp lực (+{{ diff }})
+            {% elif diff < 0 %}
+                Bạn đang nhẹ lòng hơn hôm qua một chút (−{{ diff_abs }})
+            {% else %}
+                Mọi thứ đang khá ổn định 🌿
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- AI TEXT -->
+        <div class="ai-box">
+            {{ stress.ai_analysis }}
+        </div>
+
+        <!-- FORECAST -->
+        <div class="forecast-box">
+            <span>Dự báo ngày mai</span>
+            <b>{{ forecast_text }}</b>
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+
+.stress-detail-container{
+    display:flex;
+    justify-content:center;
+    padding:40px 20px;
+}
+
+.stress-card{
+    width:100%;
+    max-width:640px;
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    border-radius:18px;
+    padding:28px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* title */
+
+.title{
+    font-size:22px;
+    font-weight:600;
+    margin-bottom:20px;
+}
+
+/* score */
+
+.score-box{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    margin-bottom:12px;
+}
+
+.score-number{
+    font-size:42px;
+    font-weight:700;
+    color:#3b82f6;
+}
+
+.score-label{
+    font-size:18px;
+    opacity:0.6;
+}
+
+/* diff */
+
+.diff-box{
+    margin-bottom:20px;
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:14px;
+}
+
+.diff-box.increase{
+    background:#fff1f2;
+    color:#dc2626;
+}
+
+.diff-box.decrease{
+    background:#ecfdf5;
+    color:#16a34a;
+}
+
+.diff-box.stable{
+    background:#f1f5f9;
+    color:#475569;
+}
+
+/* ai */
+
+.ai-box{
+    margin:20px 0;
+    line-height:1.6;
+    font-size:15px;
+    color:#334155;
+}
+
+/* forecast */
+
+.forecast-box{
+    margin-top:20px;
+    padding-top:14px;
+    border-top:1px solid rgba(0,0,0,0.08);
+    font-size:14px;
+    display:flex;
+    justify-content:space-between;
+}
+
+.forecast-box b{
+    color:#3b82f6;
+}
+
+</style>
+
+{% endblock %}

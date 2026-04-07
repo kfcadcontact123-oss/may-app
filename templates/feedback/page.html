@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+{% load tz %}
+<div class="feedback-page">
+    <div class="feedback-container">
+
+        <!-- SEARCH -->
+        <form method="get" class="search-bar">
+            <input type="text" name="q" placeholder="Tìm theo username..." value="{{ request.GET.q }}">
+            <button type="submit">Tìm kiếm</button>
+        </form>
+
+        <h2>Góp ý từ cộng đồng</h2>
+
+        <!-- FILTER + STATS -->
+        <div class="feedback-top">
+            <div class="filters">
+                <a href="/feedback/?filter=all">Tất cả</a>
+                <a href="/feedback/?filter=mine">Của bạn</a>
+            </div>
+
+            <div class="feedback-stats">
+                <span>Tổng: {{ feedbacks|length }}</span>
+            </div>
+        </div>
+
+        <!-- ADD -->
+        <form method="post" action="/feedback/add/" class="feedback-form">
+            {% csrf_token %}
+
+            <div class="feedback-input-wrap">
+                <textarea name="content"
+                          placeholder="Bạn nghĩ gì về hệ thống hôm nay, hãy chia sẻ suy nghĩ ở đây"
+                          required></textarea>
+                <button>Gửi</button>
+            </div>
+        </form>
+
+        <!-- LIST -->
+        {% for fb in feedbacks %}
+        <div class="feedback-card {% if fb.is_hearted %}hearted{% endif %}">
+
+            <div class="fb-header">
+                <div class="fb-user">
+                    <div class="mini-avatar">
+                        {% if fb.user.usermemory.avatar %}
+                            <img src="{{ fb.user.usermemory.avatar.url }}" class="avatar-img">
+                        {% else %}
+                            {{ fb.user.username|first|upper }}
+                        {% endif %}
+                    </div>
+                    <b>{{ fb.user.username }}</b>
+                </div>
+                <span>{{ fb.created_at|localtime|date:"d/m H:i" }}</span>
+            </div>
+
+            <div class="fb-content">
+                {{ fb.content }}
+            </div>
+
+            <div class="fb-actions">
+                <a href="/feedback/like/{{ fb.id }}">👍 {{ fb.like_count }}</a>
+                <a href="/feedback/dislike/{{ fb.id }}">👎 {{ fb.dislike_count }}</a>
+                <span>🔥 {{ fb.score }}</span>
+
+                <!-- luôn hiển thị -->
+{% if user.id == 1 %}
+    <a href="/feedback/heart/{{ fb.id }}">
+        {% if fb.is_hearted %}❤️{% else %}🤍{% endif %}
+    </a>
+{% else %}
+    <span>
+        {% if fb.is_hearted %}❤️{% else %}🤍{% endif %}
+    </span>
+{% endif %}
+
+                {% if user == fb.user or user.id == 1 %}
+                    <a href="/feedback/delete/{{ fb.id }}/" class="delete-btn">Xóa</a>
+                {% endif %}
+            </div>
+
+            <!-- REPLY FORM -->
+            {% if user.id == 1 %}
+            <form method="post" action="/feedback/reply/{{ fb.id }}/" class="reply-form">
+    {% csrf_token %}
+    <textarea name="content" placeholder="Trả lời..." required></textarea>
+    <button>Trả lời</button>
+</form>
+            {% endif %}
+
+            <!-- REPLIES -->
+            {% for r in fb.replies.all %}
+            <div class="reply-box">
+                <b>{{ r.user.username }}:</b> {{ r.content }}
+
+                {% if request.user == r.user or request.user.id == 1 %}
+                    <a href="{% url 'delete_reply' r.id %}" class="delete-btn">🗑</a>
+                {% endif %}
+            </div>
+            {% empty %}
+                <div class="reply-box" style="opacity:.6;">Chưa có phản hồi</div>
+            {% endfor %}
+
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock %}

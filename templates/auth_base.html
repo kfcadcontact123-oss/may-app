@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auth</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon_v2.png' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".toggle-password").forEach(icon => {
+        icon.addEventListener("click", function () {
+
+            const wrapper = this.closest(".password-field");
+            const input = wrapper.querySelector("input");
+
+            if (input.type === "password") {
+                input.type = "text";
+                this.textContent = "🙈";
+            } else {
+                input.type = "password";
+                this.textContent = "👁";
+            }
+
+        });
+    });
+});
+</script>
+
+<body>
+
+<!-- =========================
+     🌤️ MÂY BRAND HEADER
+========================= -->
+<div class="auth-brand">
+    
+    <!-- 🤖 ROBOT -->
+    <svg class="robot-auth" viewBox="0 0 64 64">
+        <!-- body -->
+        <rect x="14" y="20" width="36" height="26" rx="10" fill="#EEF2FF" stroke="#5B6CFF" stroke-width="2"/>
+
+        <!-- eyes -->
+        <circle cx="26" cy="32" r="2.5" fill="#5B6CFF"/>
+        <circle cx="38" cy="32" r="2.5" fill="#5B6CFF"/>
+
+        <!-- smile -->
+        <path d="M26 38C28 40 36 40 38 38" stroke="#5B6CFF" stroke-width="2" stroke-linecap="round"/>
+
+        <!-- antenna -->
+        <line x1="32" y1="12" x2="32" y2="20" stroke="#5B6CFF" stroke-width="2"/>
+        <circle cx="32" cy="10" r="2" fill="#5B6CFF"/>
+
+        <!-- arm static -->
+        <line x1="14" y1="30" x2="6" y2="34" stroke="#5B6CFF" stroke-width="2" stroke-linecap="round"/>
+
+        <!-- arm animated -->
+        <g class="robot-arm-auth">
+            <line x1="50" y1="30" x2="58" y2="24" stroke="#5B6CFF" stroke-width="2" stroke-linecap="round"/>
+        </g>
+    </svg>
+
+    <!-- 💗 HEART -->
+    <svg class="heart-auth" viewBox="0 0 64 64">
+        <path d="
+            M32 54
+            C32 54, 10 36, 10 22
+            C10 14, 16 10, 22 10
+            C28 10, 31 14, 32 18
+            C33 14, 36 10, 42 10
+            C48 10, 54 14, 54 22
+            C54 36, 32 54, 32 54
+        " fill="#FF6B8A"/>
+    </svg>
+
+    <!-- TEXT -->
+    <span class="brand-text-auth">Mây</span>
+
+</div>
+
+<!-- =========================
+     CONTENT
+========================= -->
+{% block content %}{% endblock %}
+
+</body>
+</html>

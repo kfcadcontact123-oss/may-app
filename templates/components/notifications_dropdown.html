@@ -1,0 +1,35 @@
+<div>
+
+{% for n in notifications %}
+
+    <div class="notif-item {% if not n.is_read %}unread{% endif %}" data-id="{{ n.id }}">
+
+        <div>
+            <b>{{ n.from_user.username }}</b> đã gửi lời mời kết bạn
+        </div>
+
+        <div style="margin-top:8px; display:flex; gap:6px;">
+
+            <button class="nav-btn"
+                    onclick="handleNotif({{ n.id }}, 'accept')">
+                ✔ Chấp nhận
+            </button>
+
+            <button class="nav-btn"
+                    onclick="handleNotif({{ n.id }}, 'decline')">
+                ✖ Từ chối
+            </button>
+
+        </div>
+
+    </div>
+
+{% empty %}
+
+    <div style="padding:10px; text-align:center; color:#666;">
+        Không có thông báo
+    </div>
+
+{% endfor %}
+
+</div>

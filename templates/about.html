@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="about-container">
+
+    <!-- HEADER -->
+    <div class="about-hero">
+        <h1>Chào bạn, mình là Mây ☁️</h1>
+        <p>
+            Một người bạn đồng hành nhỏ giúp bạn theo dõi cảm xúc
+            và chia sẻ những lúc bạn cần.
+        </p>
+    </div>
+
+    <!-- GIỚI THIỆU -->
+    <div class="about-card">
+        <h2>Mây là gì?</h2>
+        <p>
+            Đây là một nền tảng giúp bạn theo dõi mức độ căng thẳng mỗi ngày,
+            kết hợp với chatbot tâm lý để lắng nghe và đồng hành cùng bạn.
+        </p>
+        <p>
+            Mây không phải bác sĩ, nhưng sẽ luôn cố gắng hiểu bạn một cách nhẹ nhàng nhất.
+        </p>
+    </div>
+
+    <!-- VIDEO -->
+    <div class="about-card">
+        <h2>Hướng dẫn sử dụng web/ứng dụng</h2>
+
+        <div class="video-wrapper">
+            <!-- 👉 bạn thay iframe vào đây -->
+            <iframe 
+                src="https://www.youtube.com/embed/VIDEO_ID"
+                frameborder="0"
+                allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+
+    <!-- LIÊN HỆ -->
+    <div class="about-card">
+        <h2>Liên hệ với nhà phát triển của mây tại đây nhé.</h2>
+
+        <div class="contact-list">
+            <p>Email: <b>kfcadcontact123@gmail.com</b></p>
+            <p>Facebook: <b>Nguyễn Việt Khánh</b></p>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="about-footer">
+        <p>
+            Nếu bạn thấy Mây hữu ích, bạn có thể ủng hộ để mình tiếp tục phát triển nhé.
+        </p>
+    </div>
+
+</div>
+
+<style>
+
+.about-container{
+    max-width:800px;
+    margin:40px auto;
+    padding:0 20px;
+}
+
+/* hero */
+
+.about-hero{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.about-hero h1{
+    font-size:28px;
+    margin-bottom:10px;
+}
+
+.about-hero p{
+    color:#475569;
+}
+
+/* card */
+
+.about-card{
+    background: linear-gradient(135deg, #f8fafc, #eef2ff);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.06);
+}
+
+.about-card h2{
+    margin-bottom:10px;
+    font-size:18px;
+}
+
+/* video */
+
+.video-wrapper{
+    position:relative;
+    padding-bottom:56.25%;
+    height:0;
+    overflow:hidden;
+    border-radius:12px;
+}
+
+.video-wrapper iframe{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+}
+
+/* contact */
+
+.contact-list p{
+    margin:6px 0;
+}
+
+/* footer */
+
+.about-footer{
+    text-align:center;
+    margin-top:20px;
+    color:#64748b;
+    font-size:14px;
+}
+
+</style>
+
+{% endblock %}
