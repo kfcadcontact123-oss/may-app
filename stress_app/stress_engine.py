@@ -7,6 +7,7 @@ import os
 from django.utils import timezone
 from google.cloud import aiplatform
 from web_project.settings import GOOGLE_CLOUD_PROJECT
+from chat.services.ai_emotion import init_vertex
 from vertexai.generative_models import GenerativeModel
 
 
@@ -14,7 +15,7 @@ from vertexai.generative_models import GenerativeModel
 # DEBUG FLAG
 # =====================
 DEBUG_STRESS = True
-
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
 def dprint(title, data=None):
     if not DEBUG_STRESS:
         return
@@ -25,20 +26,16 @@ def dprint(title, data=None):
     elif data is not None:
         print(data)
 
-# =====================
-# INIT GEMINI
-# =====================
-PROJECT_ID = os.getenv(GOOGLE_CLOUD_PROJECT)
-REGION = "us-central1"
-
-aiplatform.init(project=PROJECT_ID, location=REGION)
-model = GenerativeModel("gemini-2.5-flash")
 
 
 # =====================
 # AI ANALYSIS
 # =====================
 def analyze_message_context(msg):
+    init_vertex()
+
+    # 🔥 ADD DÒNG NÀY
+    model = GenerativeModel("gemini-2.5-flash")
     """
     FULL AI: emotion + scores
     """
