@@ -227,6 +227,28 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
 
         addUserMessage(message);
         showTyping();
+        function pollMessage(messageId) {
+
+    const interval = setInterval(async () => {
+
+        try {
+            const res = await fetch(`/chat/status/${messageId}/`);
+            const data = await res.json();
+
+            if (data.response !== "__thinking__") {
+
+                clearInterval(interval);
+
+                removeTyping();
+                typeBotMessage(data.response);
+            }
+
+        } catch (e) {
+            console.error("Polling error:", e);
+        }
+
+    }, 1500);
+}
 
         try {
             const res = await fetch("/chat/api/", {
@@ -241,13 +263,7 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
 
             const data = await res.json();
 
-            removeTyping();
-
-            if (data.reply) {
-                typeBotMessage(data.reply);
-            } else {
-                typeBotMessage("Mây gặp lỗi xử lý dữ liệu rồi.");
-            }
+            pollMessage(data.message_id);
 
         } catch (e) {
             removeTyping();

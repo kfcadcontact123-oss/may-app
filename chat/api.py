@@ -20,41 +20,62 @@ def chat_api(request):
             data = json.loads(request.body.decode("utf-8"))
             message = data.get("message", "")
         except Exception:
-            return JsonResponse({"reply": "Lỗi đọc dữ liệu."})
+            return JsonResponse({"error": "Lỗi đọc dữ liệu."})
 
         # ======================
-        # 1. DETECT EMOTION (AI)
+        # 🔥 1. SAVE TRƯỚC
         # ======================
-        emotion = detect_emotion(message)
-
-        # ======================
-        # 2. AI REPLY
-        # ======================
-        reply = generate_ai_reply(request.user, message)
-
-        # ======================
-        # 3. 🔥 SAVE CHAT TRƯỚC (QUAN TRỌNG NHẤT)
-        # ======================
-        ChatMessage.objects.create(
+        msg = ChatMessage.objects.create(
             user=request.user,
             message=message,
-            response=reply
+            response="__thinking__"
         )
 
         # ======================
-        # 4. 🔥 UPDATE STRESS (SAU KHI ĐÃ CÓ MESSAGE)
+        # 🔥 2. BACKGROUND AI
         # ======================
-        score = calculate_stress(request.user, emotion, message)
+        def run_ai():
+            try:
+                # 1. emotion
+                emotion = detect_emotion(message)
 
-        DailyStress.objects.update_or_create(
-            user=request.user,
-            created_at=date.today(),
-            defaults={"score": score}
-        )
+                # 2. reply
+                reply = generate_ai_reply(request.user, message)
+
+                # 3. update message
+                msg.response = reply
+                msg.save()
+
+                # 4. stress
+                score = calculate_stress(request.user, emotion, message)
+
+                DailyStress.objects.update_or_create(
+                    user=request.user,
+                    created_at=date.today(),
+                    defaults={"score": score}
+                )
+
+            except Exception as e:
+                print("AI THREAD ERROR:", e)
+                msg.response = "Mây hơi chậm một chút, nhưng vẫn ở đây với bạn 💛"
+                msg.save()
+
+        import threading
+        threading.Thread(target=run_ai, daemon=True).start()
 
         # ======================
-        # RESPONSE
+        # 🔥 3. RETURN NGAY
         # ======================
-        return JsonResponse({"reply": reply})
+        return JsonResponse({
+            "status": "processing",
+            "message_id": msg.id
+        })
 
-    return JsonResponse({"reply": "Invalid request"})
+    return JsonResponse({"error": "Invalid request"})
+@login_required
+def chat_status(request, msg_id):
+    msg = ChatMessage.objects.get(id=msg_id, user=request.user)
+
+    return JsonResponse({
+        "response": msg.response
+    })
