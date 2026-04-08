@@ -1,5 +1,6 @@
 #đã fix
 from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
 from .forms import SignUpForm
 from django.core.mail import send_mail
 from django.contrib.auth import logout
@@ -22,16 +23,37 @@ def signup_view(request):
         form = SignUpForm(request.POST)
 
         if form.is_valid():
-            user = form.save()
+            email = form.cleaned_data.get("email")
+            name = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password1")
 
-            # ✅ lấy location từ form
+            user = User.objects.create_user(
+                username=email,   # 🔥 login key
+                email=email,
+                password=password
+                )
+
+            user.first_name = name  # 🔥 display name
+            user.save()
+
             location = request.POST.get("location")
+            job = request.POST.get("job")
+            age_raw = request.POST.get("age")
 
-            # ✅ tạo UserMemory
+            # 🔥 FIX AGE
+            try:
+                age = int(age_raw)
+                if age < 0 or age > 120:
+                    age = None
+            except (TypeError, ValueError):
+                age = None
+
             UserMemory.objects.create(
                 user=user,
-                location=location
-            )
+                location=location,
+                job=job,
+                age=age
+                            )
 
             # ✅ AUTO LOGIN
             login(request, user)
@@ -74,11 +96,11 @@ def profile_settings(request):
     memory, _ = UserMemory.objects.get_or_create(user=user)
 
     if request.method == "POST":
-        username = request.POST.get("username")
+        name = request.POST.get("username")
         email = request.POST.get("email")
 
-        if username and len(username) < 150:
-            user.username = username
+        if name and len(name) < 150:
+            user.first_name = name
 
         if email and "@" in email:
             user.email = email
@@ -87,7 +109,19 @@ def profile_settings(request):
         # memory
         memory.job = request.POST.get("job") or memory.job
         memory.location = request.POST.get("location") or memory.location
-        memory.age = request.POST.get("age") or memory.age
+        age_raw = request.POST.get("age")
+
+        try:
+            age = int(age_raw)
+    
+            # optional: chặn giá trị vô lý
+            if age < 0 or age > 120:
+                age = None
+
+        except (TypeError, ValueError):
+            age = None
+
+        memory.age = age
         location = request.POST.get("location")
         valid_locations = [loc[0] for loc in VIETNAM_LOCATIONS]
 

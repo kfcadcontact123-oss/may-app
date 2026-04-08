@@ -20,15 +20,29 @@
 
         <form method="post">
             {% csrf_token %}
+
+            <!-- EMAIL -->
             <div class="input-field">
-            <input type="text" name="username" placeholder="Username">
+                <input 
+                    type="email"
+                    name="username"
+                    placeholder="Email"
+                    required
+                >
             </div>
+
+            <!-- PASSWORD -->
             <div class="input-field password-field">
-            <div class="password-field">
-    <input type="password" name="password" placeholder="Mật khẩu">
-    <span class="toggle-password">👁</span>
-    </div>
-</div>
+                <div class="password-field">
+                    <input 
+                        type="password" 
+                        name="password" 
+                        placeholder="Mật khẩu"
+                        required
+                    >
+                    <span class="toggle-password">👁</span>
+                </div>
+            </div>
 
             <button class="auth-btn">Đăng nhập</button>
         </form>
@@ -36,9 +50,10 @@
         <a href="{% url 'signup' %}" class="auth-link">
             Tạo tài khoản
         </a>
+
         <a href="{% url 'password_reset' %}" class="auth-link">
-    Quên mật khẩu?
-</a>
+            Quên mật khẩu?
+        </a>
 
     </div>
 </div>

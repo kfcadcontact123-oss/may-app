@@ -46,10 +46,10 @@
                         {% if fb.user.usermemory.avatar %}
                             <img src="{{ fb.user.usermemory.avatar.url }}" class="avatar-img">
                         {% else %}
-                            {{ fb.user.username|first|upper }}
+                            {{ fb.user.first_name|default:fb.user.email|first|upper }}
                         {% endif %}
                     </div>
-                    <b>{{ fb.user.username }}</b>
+                    <b>{{ fb.user.first_name|default:fb.user.email }}</b>
                 </div>
                 <span>{{ fb.created_at|localtime|date:"d/m H:i" }}</span>
             </div>
@@ -91,7 +91,7 @@
             <!-- REPLIES -->
             {% for r in fb.replies.all %}
             <div class="reply-box">
-                <b>{{ r.user.username }}:</b> {{ r.content }}
+                <b><b>{{ r.user.first_name|default:r.user.email }}:</b>:</b> {{ r.content }}
 
                 {% if request.user == r.user or request.user.id == 1 %}
                     <a href="{% url 'delete_reply' r.id %}" class="delete-btn">🗑</a>

@@ -3,7 +3,10 @@
 <head>
     <title>Auth</title>
     {% load static %}
-    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon_v2.png' %}">
+    <!-- ✅ FIX FAVICON -->
+    <link rel="icon" type="image/png" href="{% static 'images/favicon_v2.png' %}?v=3">
+    <link rel="shortcut icon" href="{% static 'images/favicon_v2.png' %}?v=3">
+
     <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 </head>
 

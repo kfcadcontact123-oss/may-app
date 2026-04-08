@@ -9,12 +9,12 @@
             {% if profile_user.usermemory.avatar %}
                 <img src="{{ profile_user.usermemory.avatar.url }}" class="avatar-img">
             {% else %}
-                {{ profile_user.username|first|upper }}
+                {{ profile_user.first_name|default:profile_user.email|first|upper }}
             {% endif %}
         </div>
 
         <div>
-            <h2>{{ profile_user.username }}</h2>
+            <h2>{{ profile_user.first_name|default:profile_user.email }}</h2>
             <div class="profile-badges">
     {% if profile_user.is_superuser %}
         <span class="badge dev">Developer</span>
@@ -31,7 +31,8 @@
 
         <div class="info-row">
             <span>Username:</span>
-            <b>{{ profile_user.username }}</b>
+            <span>Tên:</span>
+<b>{{ profile_user.first_name|default:profile_user.email }}</b>
         </div>
 
         <div class="info-row">
