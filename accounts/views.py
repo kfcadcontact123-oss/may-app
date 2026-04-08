@@ -9,6 +9,10 @@ from chat.models import UserMemory
 from core.utils import get_user_memory
 from .views_notification import *
 from django.contrib import messages
+import os
+from dotenv import load_dotenv
+load_dotenv()
+gmail = os.getenv("EMAIL_HOST_USER")
 
 from chat.models import UserMemory, VIETNAM_LOCATIONS
 
@@ -38,8 +42,8 @@ def signup_view(request):
             if email:
                 send_mail(
         "Tạo tài khoản thành công",
-        f"Tài khoản {user.username} đã tạo thành công!",
-        "kfcadcontact123@gmail.com",
+        f"Tài khoản {user.username} đã tạo thành công! Chào mừng bạn đến với web của Mây nhé!",
+        gmail,
         [email],
     )
 
@@ -93,14 +97,14 @@ def profile_settings(request):
         messages.success(request, "saved")
         send_mail(
             "Cập nhật tài khoản",
-            "Thông tin tài khoản đã được cập nhật.",
-            "kfcadcontact123@gmail.com",
+            "Thông tin tài khoản đã được cập nhật. Nếu người cập nhật không phải là bạn, thì hãy kiểm tra bảo mật.",
+            gmail,
             [user.email],
         )
 
     return render(request, "settings.html", {
         "memory": memory,
-        "locations": VIETNAM_LOCATIONS   # 👈 thêm dòng này
+        "locations": VIETNAM_LOCATIONS 
     })
 @login_required
 def upload_avatar(request):
@@ -108,7 +112,7 @@ def upload_avatar(request):
         memory, _ = UserMemory.objects.get_or_create(user=request.user)
 
         file = request.FILES["avatar"]
-        print("FILE:", file)  # 👈 thêm
+        print("FILE:", file)
         if file and file.size < 2 * 1024 * 1024:
             memory.avatar = file
             memory.save()
@@ -159,7 +163,7 @@ def change_password_custom(request):
         # giữ login
         update_session_auth_hash(request, request.user)
 
-        messages.success(request, "Đổi mật khẩu thành công")
+        messages.success(request, "Đổi mật khẩu thành công.")
         return redirect("change_password")
 
     return render(request, "auth/change_password.html")
@@ -170,10 +174,8 @@ from django.views.decorators.http import require_POST
 def delete_account(request):
     user = request.user
 
-    # logout trước
     logout(request)
 
-    # xóa user (cascade sẽ xóa toàn bộ data liên quan)
     user.delete()
 
     return redirect("login")
