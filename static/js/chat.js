@@ -260,6 +260,11 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
                 },
                 body: JSON.stringify({ message })
             });
+            if (!res.ok) {
+    const text = await res.text();
+    console.error("SERVER RESPONSE:", text);
+    throw new Error("Server error");
+}
 
             const data = await res.json();
 
