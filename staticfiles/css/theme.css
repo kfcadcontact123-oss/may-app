@@ -1557,3 +1557,10 @@ body{
 .modal.show {
     display: flex;
 }
+#deleteModal {
+    display: none !important;
+}
+
+#deleteModal.show {
+    display: flex !important;
+}

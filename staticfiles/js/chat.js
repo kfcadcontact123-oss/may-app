@@ -1,5 +1,5 @@
 console.log("CHAT.JS LOADED");
-
+console.log("CHAT VERSION 999");
 /* =========================
    🔥 PERSIST STATE (FIX RESET)
 ========================= */
@@ -227,27 +227,57 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
 
         addUserMessage(message);
         showTyping();
+        function pollMessage(messageId) {
+
+    const interval = setInterval(async () => {
+
+        try {
+            const res = await fetch(`/chat/status/${messageId}/`);
+            const data = await res.json();
+            console.log("API RESPONSE:", data);
+            console.log("POLL:", data); // debug
+
+            // 🔥 FIX QUAN TRỌNG
+            if (!data || !data.response) {
+                return; // chưa có data → tiếp tục poll
+            }
+
+            if (data.response === "__thinking__") {
+                return; // vẫn đang xử lý
+            }
+
+            // ✅ chỉ chạy khi có response thật
+            clearInterval(interval);
+
+            removeTyping();
+            typeBotMessage(data.response);
+
+        } catch (e) {
+            console.error("Polling error:", e);
+        }
+
+    }, 1500);
+}
 
         try {
             const res = await fetch("/chat/api/", {
                 method: "POST",
-                credentials: "same-origin",
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": getCookie("csrftoken")
                 },
                 body: JSON.stringify({ message })
             });
+            if (!res.ok) {
+    const text = await res.text();
+    console.error("SERVER RESPONSE:", text);
+    throw new Error("Server error");
+}
 
             const data = await res.json();
 
-            removeTyping();
-
-            if (data.reply) {
-                typeBotMessage(data.reply);
-            } else {
-                typeBotMessage("Mây gặp lỗi xử lý dữ liệu rồi.");
-            }
+            pollMessage(data.message_id);
 
         } catch (e) {
             removeTyping();
@@ -293,6 +323,7 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
     }
 
     function typeBotMessage(text) {
+        
 
     const div = document.createElement("div");
     div.className = "message bot";

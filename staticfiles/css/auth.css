@@ -351,3 +351,22 @@ fill='none' stroke='%23ff7aa2' stroke-width='3' stroke-linejoin='round' stroke-l
     75% { transform: scale(1.1); }
     100% { transform: scale(1); opacity:0.85; }
 }
+.auth-error {
+    background: #ffe6e6;
+    color: #d60000;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    text-align: center;
+}
+.input-error {
+    border: 1px solid red;
+    background-color: #fff5f5;
+}
+
+.success-text {
+    margin-top: 10px;
+    color: green;
+    font-size: 14px;
+}
