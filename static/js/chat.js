@@ -253,7 +253,7 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
         try {
             const res = await fetch("/chat/api/", {
                 method: "POST",
-                credentials: "same-origin",
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": getCookie("csrftoken")

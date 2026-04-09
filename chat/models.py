@@ -61,7 +61,6 @@ class UserMemory(models.Model):
     personality = models.TextField(blank=True)
     main_concerns = models.TextField(blank=True)
 
-    # 🔥 NEW
     summary = models.TextField(blank=True)
 
     updated_at = models.DateTimeField(auto_now=True)

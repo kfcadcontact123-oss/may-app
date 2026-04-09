@@ -28,6 +28,14 @@ def signup_view(request):
         if form.is_valid():
             email = form.cleaned_data.get("email")
             name = form.cleaned_data.get("name")
+
+            if not name or name.strip() == "":
+                form.add_error("name", "Vui lòng nhập tên của bạn")
+                return render(request, "signup.html", {
+                                        "form": form,
+                                        "locations": VIETNAM_LOCATIONS
+                                    })
+            name = name.strip()
             password = form.cleaned_data.get("password1")
 
             existing_user = User.objects.filter(email=email).first()
@@ -35,6 +43,22 @@ def signup_view(request):
             if existing_user:
                 if not existing_user.is_active:
                     user = existing_user
+                    uid = urlsafe_base64_encode(force_bytes(user.pk))
+                    token = default_token_generator.make_token(user)
+                    verify_link = request.build_absolute_uri(
+                        reverse("verify_email", args=[uid, token])
+                                )
+
+                    send_mail(
+                        "Xác nhận tài khoản ở MâyAInd nhé.",
+                        f"Link mới của bạn:\n{verify_link}",
+                        gmail,
+                        [user.email],
+                    )
+
+                    return render(request, "auth/check_email.html", {
+                    "message": "Email xác nhận mới đã được gửi lại"
+                        })
                 else:
                     form.add_error("email", "Email đã tồn tại")
                     return render(request, "signup.html", {
@@ -44,7 +68,7 @@ def signup_view(request):
             else:
                 user = form.save(commit=False)
                 user.username = email
-                user.first_name = name or ""
+                user.first_name = name.strip()
                 user.is_active = False
                 user.save()
 
@@ -223,21 +247,24 @@ def delete_account(request):
 
     return redirect("login")
 from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
+
 def login_view(request):
+    error = None
 
     if request.method == "POST":
-        email = request.POST.get("username")  # 🔥 email
+        email = request.POST.get("username")
         password = request.POST.get("password")
 
         user = authenticate(request, username=email, password=password)
 
-        if user is not None:
+        if user is not None and user.is_active:
             login(request, user)
             return redirect("/")
         else:
-            messages.error(request, "Email hoặc mật khẩu không đúng hoặc chưa xác thực")
+            error = "Email hoặc mật khẩu không đúng"
 
-    return render(request, "login.html")
+    return render(request, "login.html", {"error": error})
 def check_email(request):
     return render(request, "auth/check_email.html")
 from django.utils.http import urlsafe_base64_decode
@@ -256,3 +283,45 @@ def verify_email(request, uidb64, token):
         return render(request, "auth/verify_success.html")
 
     return render(request, "auth/verify_failed.html")
+def send_login_link(request):
+    success = None
+
+    if request.method == "POST":
+        email = request.POST.get("email")
+        user = User.objects.filter(email=email).first()
+
+        if user and user.is_active:
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+
+            link = request.build_absolute_uri(
+                reverse("login_with_token", args=[uid, token])
+            )
+
+            send_mail(
+                "Đăng nhập vào Mây",
+                f"Click để đăng nhập:\n{link}",
+                gmail,
+                [email],
+            )
+
+        # ❗ không lộ email tồn tại hay không
+        success = "Nếu email tồn tại, link đăng nhập đã được gửi"
+
+    return render(request, "auth/login_link.html", {
+        "success": success
+    })
+from django.utils.http import urlsafe_base64_decode
+
+def login_with_token(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except:
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        login(request, user)
+        return redirect("/")
+
+    return render(request, "auth/invalid_link.html")

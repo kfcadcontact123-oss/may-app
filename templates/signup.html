@@ -24,44 +24,67 @@
             {% csrf_token %}
 
             <!-- Username -->
-            <input type="text" name="name" placeholder="Tên của bạn" required>
+            <input 
+    type="text" 
+    name="name"
+    value="{{ form.name.value|default:'' }}"
+    placeholder="{% if form.name.errors %}{{ form.name.errors.0 }}{% else %}Tên của bạn{% endif %}"
+    class="{% if form.name.errors %}input-error{% endif %}"
+    required
+>
 
             <!-- Password -->
             <div class="password-field">
-    <input type="password" name="password1" placeholder="Mật khẩu">
+    <input 
+    type="password" 
+    name="password1"
+    placeholder="{% if form.password1.errors %}{{ form.password1.errors.0 }}{% else %}Mật khẩu{% endif %}"
+    class="{% if form.password1.errors %}input-error{% endif %}"
+>
     <span class="toggle-password">👁</span>
 </div>
 
             <!-- Confirm password -->
             <div class="password-field">
-    <input type="password" name="password2" placeholder="Xác nhận mật khẩu">
+    <input 
+    type="password" 
+    name="password2"
+    placeholder="{% if form.password2.errors %}{{ form.password2.errors.0 }}{% else %}Xác nhận mật khẩu{% endif %}"
+    class="{% if form.password2.errors %}input-error{% endif %}"
+>
     <span class="toggle-password">👁</span>
 </div>
 
-<input type="email" name="email" placeholder="Email" required>
+<input 
+    type="email" 
+    name="email"
+    value="{{ form.email.value|default:'' }}"
+    placeholder="{% if form.email.errors %}{{ form.email.errors.0 }}{% else %}Email{% endif %}"
+    class="{% if form.email.errors %}input-error{% endif %}"
+    required
+>
 
 
-<input type="number" name="age" placeholder="Age" required>
+<input 
+    type="number" 
+    name="age" 
+    value="{{ form.age.value|default:'' }}"
+    placeholder="Age" 
+    required
+>
 
 <select name="location" required>
     <option value="">-- Chọn khu vực --</option>
     {% for value, label in locations %}
-        <option value="{{ value }}">{{ label }}</option>
+        <option value="{{ value }}"
+    {% if form.location.value == value %}selected{% endif %}>
+    {{ label }}
+</option>
     {% endfor %}
 </select>
 
 <input type="text" name="job" placeholder="Job" required>
 
-            <!-- ERRORS -->
-            {% if form.errors %}
-            <div class="auth-error">
-                {% for field in form %}
-                    {% for error in field.errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                {% endfor %}
-            </div>
-            {% endif %}
 
             <button type="submit" class="auth-btn">
                 Sign up

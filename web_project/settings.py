@@ -15,7 +15,7 @@ load_dotenv(BASE_DIR / ".env")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if not DATABASE_URL:
-    raise Exception("DATABASE_URL is not set")
+    raise Exception("DATABASE_URL is required for PostgreSQL")
 
 DATABASES = {
     "default": dj_database_url.config(
@@ -24,10 +24,13 @@ DATABASES = {
         ssl_require=True
     )
 }
-
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-key")
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 INSTALLED_APPS = [
     'django.contrib.admin',

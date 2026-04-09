@@ -1,0 +1,50 @@
+{% extends "auth_base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="auth-page">
+
+    <div class="heartbeat-bg"></div>
+
+    <div class="auth-card">
+
+        <h2>Login bằng email</h2>
+        <p class="auth-sub">
+            Nhập email, Mây sẽ gửi link đăng nhập cho bạn ✨
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <input 
+                type="email" 
+                name="email"
+                placeholder="Email của bạn"
+                required
+            >
+
+            <button class="auth-btn">
+                Gửi link đăng nhập
+            </button>
+        </form>
+
+        {% if success %}
+            <div class="success-text">
+                {{ success }}
+            </div>
+        {% endif %}
+
+        <a href="{% url 'login' %}" class="auth-link">
+            ← Quay lại đăng nhập
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}
