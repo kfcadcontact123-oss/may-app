@@ -17,6 +17,13 @@
 
         <h2>Welcome back</h2>
         <p class="auth-sub">Mây luôn ở đây, giúp đỡ và chữa lành cho bạn nhé.</p>
+        {% if messages %}
+    <div class="auth-error">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
 
         <form method="post">
             {% csrf_token %}

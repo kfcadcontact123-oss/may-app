@@ -1,0 +1,17 @@
+{% extends "auth_base.html" %}
+
+{% block content %}
+<div class="auth-page">
+<div class="auth-card">
+
+    <h2>Kiểm tra email</h2>
+    <p class="auth-sub">
+        Mây đã gửi link xác nhận đến email của bạn.<br>
+        Hãy mở email để kích hoạt tài khoản nhé!
+    </p>
+
+    <a href="{% url 'login' %}" class="auth-btn">Quay lại đăng nhập</a>
+
+</div>
+</div>
+{% endblock %}

@@ -6,12 +6,15 @@ from django.core.mail import send_mail
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
-from chat.models import UserMemory
 from core.utils import get_user_memory
 from .views_notification import *
 from django.contrib import messages
 import os
 from dotenv import load_dotenv
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.urls import reverse
 load_dotenv()
 gmail = os.getenv("EMAIL_HOST_USER")
 
@@ -24,59 +27,65 @@ def signup_view(request):
 
         if form.is_valid():
             email = form.cleaned_data.get("email")
-            name = form.cleaned_data.get("username")
+            name = form.cleaned_data.get("name")
             password = form.cleaned_data.get("password1")
 
-            user = User.objects.create_user(
-                username=email,   # 🔥 login key
-                email=email,
-                password=password
-                )
+            existing_user = User.objects.filter(email=email).first()
 
-            user.first_name = name  # 🔥 display name
-            user.save()
+            if existing_user:
+                if not existing_user.is_active:
+                    user = existing_user
+                else:
+                    form.add_error("email", "Email đã tồn tại")
+                    return render(request, "signup.html", {
+                        "form": form,
+                        "locations": VIETNAM_LOCATIONS
+                    })
+            else:
+                user = form.save(commit=False)
+                user.username = email
+                user.first_name = name or ""
+                user.is_active = False
+                user.save()
 
-            location = request.POST.get("location")
-            job = request.POST.get("job")
-            age_raw = request.POST.get("age")
+            # ✅ ĐOẠN NÀY PHẢI NẰM TRONG if form.is_valid()
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            verify_link = request.build_absolute_uri(
+                reverse("verify_email", args=[uid, token])
+            )
 
-            # 🔥 FIX AGE
-            try:
-                age = int(age_raw)
-                if age < 0 or age > 120:
-                    age = None
-            except (TypeError, ValueError):
-                age = None
+            send_mail(
+                "Xác nhận tài khoản ở MâyAInd nhé.",
+                f"Click link để kích hoạt:\n{verify_link}",
+                gmail,
+                [email],
+            )
 
-            UserMemory.objects.create(
+            location = form.cleaned_data.get("location")
+            job = form.cleaned_data.get("job")
+            age = form.cleaned_data.get("age")
+
+            UserMemory.objects.get_or_create(
                 user=user,
-                location=location,
-                job=job,
-                age=age
-                            )
+                defaults={
+                    "location": location,
+                    "job": job,
+                    "age": age
+                }
+            )
 
-            # ✅ AUTO LOGIN
-            login(request, user)
+            return redirect("check_email")
 
-            # ✅ SEND MAIL
-            email = form.cleaned_data.get("email")
-
-            if email:
-                send_mail(
-        "Tạo tài khoản thành công",
-        f"Tài khoản {user.username} đã tạo thành công! Chào mừng bạn đến với web của Mây nhé!",
-        gmail,
-        [email],
-    )
-
-            return redirect("home")
+        # ❗ nếu form INVALID → rơi xuống đây
+        print("FORM ERROR:", form.errors)
 
     else:
         form = SignUpForm()
 
     return render(request, "signup.html", {
         "form": form,
-        "locations": VIETNAM_LOCATIONS  # 👈 thêm cái này
+        "locations": VIETNAM_LOCATIONS
     })
 @login_required
 def profile_view(request):
@@ -96,7 +105,7 @@ def profile_settings(request):
     memory, _ = UserMemory.objects.get_or_create(user=user)
 
     if request.method == "POST":
-        name = request.POST.get("username")
+        name = request.POST.get("name")
         email = request.POST.get("email")
 
         if name and len(name) < 150:
@@ -213,3 +222,37 @@ def delete_account(request):
     user.delete()
 
     return redirect("login")
+from django.contrib.auth import authenticate
+def login_view(request):
+
+    if request.method == "POST":
+        email = request.POST.get("username")  # 🔥 email
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=email, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect("/")
+        else:
+            messages.error(request, "Email hoặc mật khẩu không đúng hoặc chưa xác thực")
+
+    return render(request, "login.html")
+def check_email(request):
+    return render(request, "auth/check_email.html")
+from django.utils.http import urlsafe_base64_decode
+
+def verify_email(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except Exception:
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+
+        return render(request, "auth/verify_success.html")
+
+    return render(request, "auth/verify_failed.html")

@@ -1,0 +1,17 @@
+{% extends "auth_base.html" %}
+
+{% block content %}
+<div class="auth-page">
+<div class="auth-card">
+
+    <h2>Xác nhận thành công</h2>
+    <p class="auth-sub">
+        Tài khoản của bạn đã được kích hoạt.<br>
+        Bạn có thể đăng nhập ngay bây giờ.
+    </p>
+
+    <a href="{% url 'login' %}" class="auth-btn">Đăng nhập</a>
+
+</div>
+</div>
+{% endblock %}

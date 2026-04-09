@@ -4,18 +4,12 @@ from django.contrib.auth import views as auth_views
 from .views import signup_view
 from .views import profile_settings
 from .views import delete_account
-from .views import profile_view, about_view
+from .views import profile_view, about_view, verify_email, check_email
 from .views import upload_avatar
 from .views_notification import *
 from .views import search_user, change_password_custom
+from accounts.views import login_view
 urlpatterns = [
-    path(
-    "login/",
-    auth_views.LoginView.as_view(
-        template_name="registration/login.html"
-    ),
-    name="login"
-),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("signup/", signup_view, name="signup"),
     path(
@@ -60,4 +54,7 @@ urlpatterns = [
     path("notif/delete/<int:id>/", delete_notification, name="notif_delete"),
     path("notif/<int:id>/", notification_detail, name="notif_detail"),
     path("notif/api/", notif_api, name="notif_api"),
+    path("login/", login_view, name="login"),
+    path("verify/<uidb64>/<token>/", verify_email, name="verify_email"),
+    path("check-email/", check_email, name="check_email")
 ]

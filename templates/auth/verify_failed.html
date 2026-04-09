@@ -1,0 +1,17 @@
+{% extends "auth_base.html" %}
+
+{% block content %}
+<div class="auth-page">
+<div class="auth-card">
+
+    <h2>Xác nhận thất bại</h2>
+    <p class="auth-sub">
+        Link xác nhận không hợp lệ hoặc đã hết hạn.<br>
+        Bạn có thể đăng ký lại hoặc yêu cầu gửi lại email.
+    </p>
+
+    <a href="{% url 'signup' %}" class="auth-btn">Đăng ký lại</a>
+
+</div>
+</div>
+{% endblock %}

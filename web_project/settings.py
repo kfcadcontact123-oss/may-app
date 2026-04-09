@@ -10,27 +10,23 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+DEBUG = os.getenv("DEBUG", "False") == "True"
+load_dotenv(BASE_DIR / ".env")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-if DATABASE_URL:
-    DATABASES = {
+if not DATABASE_URL:
+    raise Exception("DATABASE_URL is not set")
+
+DATABASES = {
     "default": dj_database_url.config(
         default=DATABASE_URL,
         conn_max_age=600,
         ssl_require=True
     )
 }
-else:
-    # 👉 dùng SQLite khi chạy local
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-        }
-    }
-load_dotenv(BASE_DIR / ".env")
+
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-key")
-DEBUG = True
+
 ALLOWED_HOSTS = ["*"]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 INSTALLED_APPS = [
