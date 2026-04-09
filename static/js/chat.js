@@ -235,13 +235,22 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
             const res = await fetch(`/chat/status/${messageId}/`);
             const data = await res.json();
 
-            if (data.response !== "__thinking__") {
+            console.log("POLL:", data); // debug
 
-                clearInterval(interval);
-
-                removeTyping();
-                typeBotMessage(data.response);
+            // 🔥 FIX QUAN TRỌNG
+            if (!data || !data.response) {
+                return; // chưa có data → tiếp tục poll
             }
+
+            if (data.response === "__thinking__") {
+                return; // vẫn đang xử lý
+            }
+
+            // ✅ chỉ chạy khi có response thật
+            clearInterval(interval);
+
+            removeTyping();
+            typeBotMessage(data.response);
 
         } catch (e) {
             console.error("Polling error:", e);
@@ -314,6 +323,7 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
     }
 
     function typeBotMessage(text) {
+        
 
     const div = document.createElement("div");
     div.className = "message bot";
