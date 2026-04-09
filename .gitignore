@@ -9,3 +9,4 @@ web_project/credentials/*.json
 dockerfile
 docker-compose.yml
 README.md
+staticfiles/
