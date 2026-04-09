@@ -17,6 +17,7 @@ from django.utils.encoding import force_bytes
 from django.urls import reverse
 load_dotenv()
 gmail = os.getenv("EMAIL_HOST_USER")
+domain = os.getenv("DOMAIN")
 
 from chat.models import UserMemory, VIETNAM_LOCATIONS
 
@@ -45,12 +46,10 @@ def signup_view(request):
                     user = existing_user
                     uid = urlsafe_base64_encode(force_bytes(user.pk))
                     token = default_token_generator.make_token(user)
-                    verify_link = request.build_absolute_uri(
-                        reverse("verify_email", args=[uid, token])
-                                )
+                    verify_link = f"{domain}{reverse('verify_email', args=[uid, token])}"
 
                     send_mail(
-                        "Xác nhận tài khoản ở MâyAInd nhé.",
+                        "Xác nhận tài khoản ở MâyAI nhé.",
                         f"Link mới của bạn:\n{verify_link}",
                         gmail,
                         [user.email],
