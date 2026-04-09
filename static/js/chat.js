@@ -1,5 +1,5 @@
 console.log("CHAT.JS LOADED");
-
+console.log("CHAT VERSION 999");
 /* =========================
    🔥 PERSIST STATE (FIX RESET)
 ========================= */
