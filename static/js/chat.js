@@ -234,7 +234,7 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
         try {
             const res = await fetch(`/chat/status/${messageId}/`);
             const data = await res.json();
-
+            console.log("API RESPONSE:", data);
             console.log("POLL:", data); // debug
 
             // 🔥 FIX QUAN TRỌNG
