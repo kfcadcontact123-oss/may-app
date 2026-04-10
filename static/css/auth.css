@@ -370,3 +370,16 @@ fill='none' stroke='%23ff7aa2' stroke-width='3' stroke-linejoin='round' stroke-l
     color: green;
     font-size: 14px;
 }
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.auth-error {
+    background: #ffe6e6;
+    color: #d60000;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+}

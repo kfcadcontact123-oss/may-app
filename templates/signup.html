@@ -9,10 +9,8 @@
 
 <div class="auth-page">
 
-    <!-- HEART / HEARTBEAT BACKGROUND -->
     <div class="heartbeat-bg"></div>
 
-    <!-- SIGNUP CARD -->
     <div class="auth-card">
 
         <h2>Create account</h2>
@@ -23,68 +21,111 @@
         <form method="post">
             {% csrf_token %}
 
-            <!-- Username -->
-            <input 
-    type="text" 
-    name="name"
-    value="{{ form.name.value|default:'' }}"
-    placeholder="{% if form.name.errors %}{{ form.name.errors.0 }}{% else %}Tên của bạn{% endif %}"
-    class="{% if form.name.errors %}input-error{% endif %}"
-    required
->
+            <!-- NAME -->
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    name="name"
+                    value="{{ form.name.value|default:'' }}"
+                    placeholder="Tên của bạn"
+                    class="{% if form.name.errors %}input-error{% endif %}"
+                    required
+                >
+                {% if form.name.errors %}
+                <div class="auth-error">{{ form.name.errors.0 }}</div>
+                {% endif %}
+            </div>
 
-            <!-- Password -->
-            <div class="password-field">
-    <input 
-    type="password" 
-    name="password1"
-    placeholder="{% if form.password1.errors %}{{ form.password1.errors.0 }}{% else %}Mật khẩu{% endif %}"
-    class="{% if form.password1.errors %}input-error{% endif %}"
->
-    <span class="toggle-password">👁</span>
-</div>
+            <!-- PASSWORD -->
+            <div class="input-group password-field">
+                <input 
+                    type="password" 
+                    name="password1"
+                    placeholder="Mật khẩu"
+                    class="{% if form.password1.errors %}input-error{% endif %}"
+                    required
+                >
+                <span class="toggle-password">👁</span>
+            </div>
+            {% if form.password1.errors %}
+            <div class="auth-error">{{ form.password1.errors.0 }}</div>
+            {% endif %}
 
-            <!-- Confirm password -->
-            <div class="password-field">
-    <input 
-    type="password" 
-    name="password2"
-    placeholder="{% if form.password2.errors %}{{ form.password2.errors.0 }}{% else %}Xác nhận mật khẩu{% endif %}"
-    class="{% if form.password2.errors %}input-error{% endif %}"
->
-    <span class="toggle-password">👁</span>
-</div>
+            <!-- CONFIRM PASSWORD -->
+            <div class="input-group password-field">
+                <input 
+                    type="password" 
+                    name="password2"
+                    placeholder="Xác nhận mật khẩu"
+                    class="{% if form.password2.errors %}input-error{% endif %}"
+                    required
+                >
+                <span class="toggle-password">👁</span>
+            </div>
+            {% if form.password2.errors %}
+            <div class="auth-error">{{ form.password2.errors.0 }}</div>
+            {% endif %}
 
-<input 
-    type="email" 
-    name="email"
-    value="{{ form.email.value|default:'' }}"
-    placeholder="{% if form.email.errors %}{{ form.email.errors.0 }}{% else %}Email{% endif %}"
-    class="{% if form.email.errors %}input-error{% endif %}"
-    required
->
+            <!-- EMAIL -->
+            <div class="input-group">
+                <input 
+                    type="email" 
+                    name="email"
+                    value="{{ form.email.value|default:'' }}"
+                    placeholder="Email"
+                    class="{% if form.email.errors %}input-error{% endif %}"
+                    required
+                >
+                {% if form.email.errors %}
+                <div class="auth-error">{{ form.email.errors.0 }}</div>
+                {% endif %}
+            </div>
 
+            <!-- AGE -->
+            <div class="input-group">
+                <input 
+                    type="number" 
+                    name="age"
+                    value="{{ form.age.value|default:'' }}"
+                    placeholder="Age"
+                    class="{% if form.age.errors %}input-error{% endif %}"
+                    required
+                >
+                {% if form.age.errors %}
+                <div class="auth-error">{{ form.age.errors.0 }}</div>
+                {% endif %}
+            </div>
 
-<input 
-    type="number" 
-    name="age" 
-    value="{{ form.age.value|default:'' }}"
-    placeholder="Age" 
-    required
->
+            <!-- LOCATION -->
+            <div class="input-group">
+                <select name="location" required>
+                    <option value="">-- Chọn khu vực --</option>
+                    {% for value, label in locations %}
+                        <option value="{{ value }}"
+                            {% if form.location.value == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if form.location.errors %}
+                <div class="auth-error">{{ form.location.errors.0 }}</div>
+                {% endif %}
+            </div>
 
-<select name="location" required>
-    <option value="">-- Chọn khu vực --</option>
-    {% for value, label in locations %}
-        <option value="{{ value }}"
-    {% if form.location.value == value %}selected{% endif %}>
-    {{ label }}
-</option>
-    {% endfor %}
-</select>
-
-<input type="text" name="job" placeholder="Job" required>
-
+            <!-- JOB -->
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    name="job"
+                    value="{{ form.job.value|default:'' }}"
+                    placeholder="Job"
+                    class="{% if form.job.errors %}input-error{% endif %}"
+                    required
+                >
+                {% if form.job.errors %}
+                <div class="auth-error">{{ form.job.errors.0 }}</div>
+                {% endif %}
+            </div>
 
             <button type="submit" class="auth-btn">
                 Sign up

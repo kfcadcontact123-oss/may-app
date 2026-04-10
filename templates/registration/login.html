@@ -21,6 +21,11 @@
         <form method="post">
             {% csrf_token %}
 
+            {% if error %}
+<div class="auth-error">
+    Email hoặc mật khẩu không đúng
+</div>
+{% endif %}
             <!-- EMAIL -->
             <div class="input-field">
                 <input 
@@ -43,11 +48,7 @@
                     <span class="toggle-password">👁</span>
                 </div>
             </div>
-            {% if error %}
-<div class="error-text">
-    Email hoặc mật khẩu không đúng
-</div>
-{% endif %}
+            
 
             <button class="auth-btn">Đăng nhập</button>
         </form>

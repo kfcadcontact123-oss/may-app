@@ -26,7 +26,8 @@ DATABASES = {
 }
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-key")
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+#ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 CSRF_COOKIE_SECURE = True

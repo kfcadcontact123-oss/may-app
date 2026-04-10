@@ -245,7 +245,6 @@ def delete_account(request):
     user.delete()
 
     return redirect("login")
-from django.contrib.auth import authenticate
 from django.contrib.auth import authenticate, login
 
 def login_view(request):
