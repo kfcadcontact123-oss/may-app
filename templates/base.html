@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MâyAI</title>
     {% load static %}
 
@@ -256,6 +257,47 @@ function goNotif(url, id){
         }, 100);
     }
 }
+</script>
+<!-- FLOAT CHAT BUTTON -->
+<div id="chat-float-btn">💬</div>
+
+<!-- CHAT OVERLAY -->
+<div id="chat-overlay">
+    <div class="chat-box" onclick="event.stopPropagation()">
+
+        <div class="chat-header">
+            Mây AI
+        </div>
+
+        <div id="chat-messages" class="chat-messages"></div>
+
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Nhắn tin..." />
+            <button onclick="sendMessage()">Gửi</button>
+        </div>
+
+    </div>
+</div>
+<div class="mobile-bottom-nav">
+    <a href="/" class="nav-item">Trang Chủ</a>
+    <a href="/feedback/" class="nav-item">Mây</a>
+    <a href="/settings/" class="nav-item">Cài đặt</a>
+    <a href="/donate/" class="nav-item">Ủng hộ</a>
+    <a href="/about/" class="nav-item">Giới thiệu</a>
+</div>
+<script>
+const btn = document.getElementById("chat-float-btn");
+const overlay = document.getElementById("chat-overlay");
+
+btn.onclick = () => {
+    overlay.style.display = "block";
+    setTimeout(() => overlay.classList.add("active"), 10);
+};
+
+overlay.onclick = () => {
+    overlay.classList.remove("active");
+    setTimeout(() => overlay.style.display = "none", 200);
+};
 </script>
 </body>
 </html>

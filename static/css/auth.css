@@ -383,3 +383,11 @@ fill='none' stroke='%23ff7aa2' stroke-width='3' stroke-linejoin='round' stroke-l
     border-radius: 8px;
     font-size: 13px;
 }
+@media (max-width: 768px) {
+
+    .auth-card {
+        width: 90%;
+        padding: 20px;
+    }
+
+}

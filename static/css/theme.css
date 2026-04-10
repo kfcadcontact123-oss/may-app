@@ -28,6 +28,7 @@ body{
   font-family:system-ui;
   background:linear-gradient(135deg,#eef2ff,#f8fbff);
   display:flex;
+  padding-bottom: 80px;
   flex-direction:column;
   overflow-x: hidden;
   overflow-y: auto;
@@ -1563,4 +1564,171 @@ body{
 
 #deleteModal.show {
     display: flex !important;
+}
+/* ===== MOBILE LAYOUT ===== */
+
+@media (max-width: 768px) {
+
+    .app-layout {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .left-panel,
+    .right-panel {
+        display: none;
+    }
+
+    .center-panel {
+        width: 100%;
+        padding: 12px;
+    }
+
+}
+#chat-float-btn {
+    display: none;
+}
+
+@media (max-width: 768px) {
+
+    #chat-float-btn {
+        display: flex;
+        position: fixed;
+        bottom: 80px;
+        right: 16px;
+
+        width: 56px;
+        height: 56px;
+
+        background: #5B6CFF;
+        color: white;
+
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 50%;
+        font-size: 24px;
+
+        z-index: 1000;
+    }
+
+}
+#chat-overlay {
+    display: none;
+}
+
+@media (max-width: 768px) {
+
+    #chat-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.3);
+        z-index: 1000;
+    }
+
+    .chat-box {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 80%;
+
+        background: white;
+        border-radius: 16px 16px 0 0;
+
+        transform: translateY(100%);
+        transition: 0.3s;
+    }
+
+    #chat-overlay.active .chat-box {
+        transform: translateY(0);
+    }
+
+}
+.mobile-bottom-nav {
+    display: none;
+}
+
+@media (max-width: 768px) {
+
+    .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+
+        justify-content: space-around;
+        padding: 10px 0;
+
+        background: white;
+        border-top: 1px solid #eee;
+
+        z-index: 999;
+    }
+
+}
+@media (max-width: 768px) {
+
+    /* ===== PADDING CHUNG ===== */
+    body {
+        padding: 10px;
+    }
+
+    /* ===== CARD FULL WIDTH ===== */
+    .card,
+    .settings-card,
+    .profile-card,
+    .feedback-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 10px 0 !important;
+        padding: 14px !important;
+    }
+
+    /* ===== TEXT SCALE ===== */
+    h1 { font-size: 20px; }
+    h2 { font-size: 18px; }
+    h3 { font-size: 16px; }
+
+    /* ===== BUTTON FULL WIDTH ===== */
+    .nav-btn,
+    .auth-btn,
+    button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* ===== FORM ===== */
+    input, textarea, select {
+        width: 100%;
+        font-size: 14px;
+    }
+
+}
+@media (max-width: 768px) {
+
+    .nav-left {
+        display: none;
+    }
+
+}
+@media (max-width: 768px) {
+
+    .feedback-container {
+        padding: 10px;
+    }
+
+    .feedback-card {
+        padding: 12px;
+    }
+
+}
+@media (max-width: 768px) {
+
+    .settings-card {
+        margin: 10px;
+        padding: 14px;
+    }
+
 }
