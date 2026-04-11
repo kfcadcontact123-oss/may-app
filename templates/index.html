@@ -137,14 +137,12 @@
 
 
     <!-- RIGHT -->
-     <div class="right-panel desktop-only">
-    <aside class="right-panel">
+     <aside class="right-panel desktop-only">
         <div id="chat-launcher">
     {% include "chat/chat_box.html" %}
 </div>
     </aside>
 
-</div>
 </div>
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -366,39 +364,6 @@ const chart = new Chart(document.getElementById("stressChart"), {
 });
 </script>
 
-<style>
-
-
-/* panels */
-
-.left-panel{
-    display:flex;
-    flex-direction:column;
-}
-
-.center-panel{
-    display:flex;
-    flex-direction:column;
-    gap:20px;
-}
-
-.right-panel{
-    display:flex;
-    flex-direction:column;
-}
-
-/* cards */
-
-.card{
-    background:white;
-    border-radius:14px;
-    padding:20px;
-    box-shadow:0 8px 20px rgba(0,0,0,0.08);
-}
-.app-layout .chatbot{
-    height:100%;
-}
-</style>
 <script>
 function handleFriendAction(userId, action, el){
     fetch(`/accounts/${action}/${userId}/`, {
@@ -443,4 +408,5 @@ function getCSRFToken(){
     return document.querySelector('[name=csrfmiddlewaretoken]').value
 }
 </script>
+<button id="people-float-btn">bạn có thể biết</button>
 {% endblock %}

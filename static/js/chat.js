@@ -1,5 +1,5 @@
-console.log("CHAT.JS LOADED");
-console.log("CHAT VERSION 999");
+console.log("NEWCHAT.JS LOADED");
+console.log("CHAT VERSION 1000000000");
 /* =========================
    🔥 PERSIST STATE (FIX RESET)
 ========================= */
@@ -392,3 +392,20 @@ window.addEventListener("pageshow", () => {
 
     void widget.offsetHeight;
 });
+function openChat(){
+  const overlay = document.getElementById("chat-overlay");
+  overlay.style.display = "block";
+
+  requestAnimationFrame(()=>{
+    overlay.classList.add("active");
+  });
+}
+function closeChat(){
+  const overlay = document.getElementById("chat-overlay");
+
+  overlay.classList.remove("active");
+
+  setTimeout(()=>{
+    overlay.style.display = "none";
+  }, 200);
+}

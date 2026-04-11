@@ -38,7 +38,7 @@
     <!-- LEFT -->
     <div class="nav-left">
         <a href="/" class="nav-btn nav-home">Trang Chủ</a>
-        <a href="/chat/" class="nav-btn nav-chat">Mây</a>
+        <a href="/chat/" onclick="handleChatClick(event)" class="nav-btn nav-chat">Mây</a>
         <a href="/feedback/" class="nav-btn nav-feedback">Góp Ý</a>
         <a href="{% url 'profile' %}" class="nav-btn nav-text">Trang Cá Nhân</a>
         <a href="{% url 'settings' %}" class="nav-btn nav-text">Cài Đặt</a>
@@ -112,7 +112,7 @@ document.addEventListener("click", function(e){
     const box = document.getElementById("notifDropdown");
     const btn = document.querySelector(".notif-btn");
 
-    if(!box.contains(e.target) && !btn.contains(e.target)){
+    if(box && btn && !box.contains(e.target) && !btn.contains(e.target)){
         box.classList.remove("show");
     }
 });
@@ -258,8 +258,6 @@ function goNotif(url, id){
     }
 }
 </script>
-<!-- FLOAT CHAT BUTTON -->
-<div id="chat-float-btn">💬</div>
 
 <!-- CHAT OVERLAY -->
 <div id="chat-overlay">
@@ -269,35 +267,41 @@ function goNotif(url, id){
             Mây AI
         </div>
 
-        <div id="chat-messages" class="chat-messages"></div>
+        <div id="chat-box-overlay" class="chat-messages"></div>
 
         <div class="chat-input-area">
             <input type="text" id="chat-input" placeholder="Nhắn tin..." />
-            <button onclick="sendMessage()">Gửi</button>
+            <button id="send-btn">Gửi</button>
         </div>
 
     </div>
 </div>
-<div class="mobile-bottom-nav">
-    <a href="/" class="nav-item">Trang Chủ</a>
-    <a href="/feedback/" class="nav-item">Mây</a>
-    <a href="/settings/" class="nav-item">Cài đặt</a>
-    <a href="/donate/" class="nav-item">Ủng hộ</a>
-    <a href="/about/" class="nav-item">Giới thiệu</a>
-</div>
 <script>
-const btn = document.getElementById("chat-float-btn");
-const overlay = document.getElementById("chat-overlay");
+const peopleBtn = document.getElementById("people-float-btn");
 
-btn.onclick = () => {
-    overlay.style.display = "block";
-    setTimeout(() => overlay.classList.add("active"), 10);
-};
+if (peopleBtn) {
+    peopleBtn.onclick = () => {
+        const leftPanel = document.querySelector(".left-panel");
+        if(leftPanel) leftPanel.classList.add("active");
+    };
 
-overlay.onclick = () => {
-    overlay.classList.remove("active");
-    setTimeout(() => overlay.style.display = "none", 200);
-};
+    document.addEventListener("click", (e) => {
+        const leftPanel = document.querySelector(".left-panel");
+        if (!leftPanel) return;
+
+        if (!leftPanel.contains(e.target) && !peopleBtn.contains(e.target)) {
+            leftPanel.classList.remove("active");
+        }
+    });
+}
+</script>
+<script>
+function handleChatClick(e){
+    if(window.innerWidth <= 768){
+        e.preventDefault();
+        openChat();
+    }
+}
 </script>
 </body>
 </html>

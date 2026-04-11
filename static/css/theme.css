@@ -25,14 +25,10 @@ html, body{
 }
 
 body{
-  font-family:system-ui;
-  background:linear-gradient(135deg,#eef2ff,#f8fbff);
   display:flex;
-  padding-bottom: 80px;
   flex-direction:column;
-  overflow-x: hidden;
-  overflow-y: auto;
   min-height:100vh;
+  overflow-x:hidden;
 }
 
 /* =========================
@@ -338,7 +334,8 @@ body{
   display:flex;
   justify-content:space-between;
   align-items:center;
-
+  position: sticky;
+  top: 0;
   padding:12px 24px;
 
   background:rgba(255,255,255,0.6);
@@ -1565,170 +1562,174 @@ body{
 #deleteModal.show {
     display: flex !important;
 }
-/* ===== MOBILE LAYOUT ===== */
+/* =========================================
+   🔥 MOBILE SYSTEM (CLEAN - SINGLE SOURCE)
+========================================= */
 
+/* =========================================
+   🔥 MOBILE SYSTEM — CLEAN ARCHITECTURE
+========================================= */
+
+@media (max-width: 768px){
+
+  /* =========================
+     BASE
+  ========================= */
+  body{
+    padding-bottom:70px;
+  }
+
+  /* =========================
+     LAYOUT → SINGLE COLUMN
+  ========================= */
+  .app-layout{
+    display:flex;
+    flex-direction:column;
+    padding:10px;
+    gap:12px;
+    height:auto;
+  }
+
+  .center-panel{
+    width:100%;
+  }
+
+  /* =========================
+     RIGHT PANEL (CHAT DESKTOP) → HIDE
+  ========================= */
+  .right-panel,
+  .desktop-only{
+    display:none !important;
+  }
+
+  /* =========================
+     LEFT PANEL → SLIDE SYSTEM
+  ========================= */
+  .left-panel{
+    position:fixed;
+    top:0;
+    left:-100%;
+    width:85%;
+    height:100%;
+    background:white;
+    z-index:9999;
+
+    transition:left 0.3s ease;
+    overflow-y:auto;
+  }
+
+  .left-panel.active{
+    left:0;
+  }
+
+  /* =========================
+     NAV → BOTTOM BAR
+  ========================= */
+  .main-nav{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:60px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-around;
+
+    background:white;
+    border-top:1px solid #eee;
+
+    z-index:1000;
+  }
+
+  .nav-right{
+    display:none;
+  }
+
+  /* 👉 CHỈ GIỮ 2 NÚT QUAN TRỌNG */
+  .nav-left{
+    width:100%;
+    display:flex;
+    justify-content:space-around;
+  }
+
+  .nav-left a{
+    display:none;
+  }
+
+  .nav-left .nav-home,
+  .nav-left .nav-chat{
+    display:flex;
+  }
+
+  /* =========================
+     CHAT OVERLAY → FULL SCREEN
+  ========================= */
+  #chat-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.3);
+    z-index:9999;
+  }
+
+  #chat-overlay.active{
+    display:block;
+  }
+
+  .chat-box{
+    position:absolute;
+    inset:0;
+
+    width:100%;
+    height:100%;
+
+    background:white;
+    border-radius:0;
+
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* =========================
+     CHAT FIX
+  ========================= */
+  .chatbot{
+    height:100%;
+    max-height:100%;
+    border-radius:0;
+  }
+
+  .message{
+    max-width:90%;
+  }
+
+  /* =========================
+     FLOAT BUTTON (PEOPLE)
+  ========================= */
+  #people-float-btn{
+    position:fixed;
+    bottom:80px;
+    left:12px;
+    z-index:1001;
+
+    background:#6c8cff;
+    color:white;
+    border:none;
+
+    padding:10px 14px;
+    border-radius:999px;
+
+    box-shadow:0 6px 20px rgba(0,0,0,.2);
+  }
+
+}
 @media (max-width: 768px) {
-
-    .app-layout {
-        display: flex;
-        flex-direction: column;
+    .chart-scroll {
+        height: 260px; /* mobile */
     }
-
-    .left-panel,
-    .right-panel {
-        display: none;
-    }
-
-    .center-panel {
-        width: 100%;
-        padding: 12px;
-    }
-
-}
-#chat-float-btn {
-    display: none;
 }
 
-@media (max-width: 768px) {
-
-    #chat-float-btn {
-        display: flex;
-        position: fixed;
-        bottom: 80px;
-        right: 16px;
-
-        width: 56px;
-        height: 56px;
-
-        background: #5B6CFF;
-        color: white;
-
-        align-items: center;
-        justify-content: center;
-
-        border-radius: 50%;
-        font-size: 24px;
-
-        z-index: 1000;
-    }
-
-}
-#chat-overlay {
-    display: none;
-}
-
-@media (max-width: 768px) {
-
-    #chat-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.3);
-        z-index: 1000;
-    }
-
-    .chat-box {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 80%;
-
-        background: white;
-        border-radius: 16px 16px 0 0;
-
-        transform: translateY(100%);
-        transition: 0.3s;
-    }
-
-    #chat-overlay.active .chat-box {
-        transform: translateY(0);
-    }
-
-}
-.mobile-bottom-nav {
-    display: none;
-}
-
-@media (max-width: 768px) {
-
-    .mobile-bottom-nav {
-        display: flex;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-
-        justify-content: space-around;
-        padding: 10px 0;
-
-        background: white;
-        border-top: 1px solid #eee;
-
-        z-index: 999;
-    }
-
-}
-@media (max-width: 768px) {
-
-    /* ===== PADDING CHUNG ===== */
-    body {
-        padding: 10px;
-    }
-
-    /* ===== CARD FULL WIDTH ===== */
-    .card,
-    .settings-card,
-    .profile-card,
-    .feedback-container {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 10px 0 !important;
-        padding: 14px !important;
-    }
-
-    /* ===== TEXT SCALE ===== */
-    h1 { font-size: 20px; }
-    h2 { font-size: 18px; }
-    h3 { font-size: 16px; }
-
-    /* ===== BUTTON FULL WIDTH ===== */
-    .nav-btn,
-    .auth-btn,
-    button {
-        width: 100%;
-        justify-content: center;
-    }
-
-    /* ===== FORM ===== */
-    input, textarea, select {
-        width: 100%;
-        font-size: 14px;
-    }
-
-}
-@media (max-width: 768px) {
-
-    .nav-left {
-        display: none;
-    }
-
-}
-@media (max-width: 768px) {
-
-    .feedback-container {
-        padding: 10px;
-    }
-
-    .feedback-card {
-        padding: 12px;
-    }
-
-}
-@media (max-width: 768px) {
-
-    .settings-card {
-        margin: 10px;
-        padding: 14px;
-    }
-
+.chart-scroll canvas {
+    height: 100% !important;
 }
