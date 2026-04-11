@@ -11,6 +11,7 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = os.getenv("DEBUG", "False") == "True"
+#DEBUG = True
 load_dotenv(BASE_DIR / ".env")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -26,8 +27,8 @@ DATABASES = {
 }
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-key")
 
-#ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+#ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 CSRF_COOKIE_SECURE = True
@@ -117,4 +118,4 @@ AUTHENTICATION_BACKENDS = [
 ]
 CSRF_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SAMESITE = "None"
-print("🔥 SETTINGS LOADED FROM:", BASE_DIR)
+#print("🔥 SETTINGS LOADED FROM:", BASE_DIR)

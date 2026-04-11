@@ -5,7 +5,9 @@ console.log("CHAT VERSION 1000000000");
 ========================= */
 
 const todayKey = new Date().toISOString().slice(0, 10);
-
+function getChatBox(){
+    return document.getElementById("chat-box");
+}
 // reset mỗi ngày
 const lastDate = localStorage.getItem("voiceDate");
 if (lastDate !== todayKey) {
@@ -163,10 +165,9 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
 
 });
     const input = document.getElementById("chat-input");
-    const box = document.getElementById("chat-box");
     const sendBtn = document.getElementById("send-btn");
 
-    if (!input || !box) return;
+    if (!input) return;
 
     /* =========================
        AUTO RESIZE
@@ -200,18 +201,23 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
     ========================= */
 
     function scrollToBottomInstant() {
-        box.scrollTop = box.scrollHeight;
-    }
+    const box = getChatBox();
+    if(!box) return;
+    box.scrollTop = box.scrollHeight;
+}
 
     requestAnimationFrame(scrollToBottomInstant);
     setTimeout(scrollToBottomInstant, 120);
 
     function smoothScroll() {
-        box.scrollTo({
-            top: box.scrollHeight,
-            behavior: "smooth"
-        });
-    }
+    const box = getChatBox();
+    if(!box) return;
+
+    box.scrollTo({
+        top: box.scrollHeight,
+        behavior: "smooth"
+    });
+}
 
     /* =========================
        SEND MESSAGE
@@ -302,7 +308,7 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
         const div = document.createElement("div");
         div.className = "message user";
         div.textContent = text;
-        box.appendChild(div);
+        getChatBox()?.appendChild(div);
         smoothScroll();
     }
 
@@ -314,7 +320,7 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
             <div class="dot"></div>
             <div class="dot"></div>
             <div class="dot"></div>`;
-        box.appendChild(typing);
+        getChatBox()?.appendChild(typing);
         smoothScroll();
     }
 
@@ -340,7 +346,7 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
     btn.dataset.text = text;
 
     div.appendChild(btn);
-    box.appendChild(div);
+    getChatBox()?.appendChild(div);
 
     // =========================
     // 🔥 CHECK BACKEND CACHE
@@ -393,19 +399,13 @@ window.addEventListener("pageshow", () => {
     void widget.offsetHeight;
 });
 function openChat(){
-  const overlay = document.getElementById("chat-overlay");
-  overlay.style.display = "block";
-
-  requestAnimationFrame(()=>{
-    overlay.classList.add("active");
-  });
+  if(window.innerWidth <= 768){
+    const panel = document.querySelector(".right-panel");
+    panel.classList.add("active");
+  }
 }
-function closeChat(){
-  const overlay = document.getElementById("chat-overlay");
 
-  overlay.classList.remove("active");
-
-  setTimeout(()=>{
-    overlay.style.display = "none";
-  }, 200);
+function closeMobileChat(){
+  const panel = document.querySelector(".right-panel");
+  panel.classList.remove("active");
 }
