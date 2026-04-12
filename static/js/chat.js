@@ -1,5 +1,5 @@
 console.log("NEWCHAT.JS LOADED");
-console.log("CHAT VERSION 1000000000");
+console.log("CHAT VERSION 1000000001");
 /* =========================
    🔥 PERSIST STATE (FIX RESET)
 ========================= */
@@ -401,11 +401,15 @@ window.addEventListener("pageshow", () => {
 function openChat(){
   if(window.innerWidth <= 768){
     const panel = document.querySelector(".right-panel");
+    const center = document.querySelector(".center-panel");
     panel.classList.add("active");
+    if(center) center.style.display = "none";
   }
 }
 
 function closeMobileChat(){
   const panel = document.querySelector(".right-panel");
+  const center = document.querySelector(".center-panel");
   panel.classList.remove("active");
+  if(center) center.style.display = "flex"; 
 }

@@ -10,20 +10,23 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 DEBUG = os.getenv("DEBUG", "False") == "True"
 #DEBUG = True
-load_dotenv(BASE_DIR / ".env")
+
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if not DATABASE_URL:
     raise Exception("DATABASE_URL is required for PostgreSQL")
 
 DATABASES = {
-    "default": dj_database_url.config(
-        default=DATABASE_URL,
-        conn_max_age=600,
-        ssl_require=True
-    )
+    "default": {
+        **dj_database_url.parse(DATABASE_URL, conn_max_age=0),
+        "OPTIONS": {
+            "sslmode": "require",
+            "connect_timeout": 10,
+        },
+    }
 }
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-key")
 
@@ -31,8 +34,6 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 #ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -116,6 +117,22 @@ AUTHENTICATION_BACKENDS = [
     'accounts.backends.EmailBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
-CSRF_COOKIE_SAMESITE = "None"
-SESSION_COOKIE_SAMESITE = "None"
+if DEBUG:
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+else:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = "None"
+    SESSION_COOKIE_SAMESITE = "None"
+    SECURE_SSL_REDIRECT = True
+
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+
+    X_FRAME_OPTIONS = "DENY"
 #print("🔥 SETTINGS LOADED FROM:", BASE_DIR)

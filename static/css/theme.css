@@ -28,6 +28,7 @@ body{
   display:flex;
   flex-direction:column;
   min-height:100vh;
+  padding-top: 60px;
   overflow-x:hidden;
 }
 
@@ -36,7 +37,7 @@ body{
 ========================= */
 
 .app-layout{
-  height:calc(100vh - 60px); /* trừ nav */
+  min-height:calc(100vh - 60px); /* trừ nav */
   display:grid;
   grid-template-columns:280px 1fr 320px;
   gap:20px;
@@ -63,6 +64,7 @@ body{
 
 .left-panel{
   overflow-y:auto;
+  min-height:0;
 }
 
 .center-panel{
@@ -79,7 +81,8 @@ body{
   min-height:0;
   overflow:hidden;
   border-radius: 16px;
-  width:320px;
+  width:100%;   
+  max-width:320px;
   justify-content:flex-start;
   padding-top: 10px;
   position:sticky;
@@ -97,6 +100,8 @@ body{
   min-height:0;
   overflow: hidden;
   height:100%;
+  width:100%;       
+  max-width:100%;
 }
 
 /* ---------- HEADER ---------- */
@@ -107,6 +112,7 @@ body{
   gap:12px;
   margin-bottom:10px;
   flex-shrink:0;
+  padding: 10px 12px;
 }
 
 .bot-avatar{
@@ -138,7 +144,6 @@ body{
     min-height: 0;
 }
 #chat-box{
-   flex:1;
     overflow-y:auto;
     min-height:0;
     padding:10px;
@@ -296,8 +301,9 @@ body{
   flex:1;
   min-height:0;
   overflow: hidden;
-  width:320px;
-  max-width: 100%;
+
+  width:100%;        
+  max-width:100%;
 }
 
 /* trạng thái expand */
@@ -689,22 +695,7 @@ body{
   color:#5b6cff;
   box-shadow: 0 4px 12px rgba(108,140,255,.25);
 }
-.nav-text:nth-of-type(4){
-  background:#ede9fe;
-  color:#6d28d9;
-}
 
-/* Settings */
-.nav-text:nth-of-type(5){
-  background:#eef2ff;
-  color:#4338ca;
-}
-
-/* About */
-.nav-text:nth-of-type(6){
-  background:#f8faff;
-  color:#6366f1;
-}
 .nav-text:hover{
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(108,140,255,.35);
@@ -746,15 +737,6 @@ body{
     overflow-y:auto;
 }
 
-.people-item{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    padding:8px;
-    border-radius:12px;
-    transition:.2s;
-    flex-direction:column;
-}
 .profile h2{
   margin-top:6px;
 }
@@ -818,6 +800,10 @@ body{
     align-items:flex-start; /* cực quan trọng */
     gap:12px;
     padding:10px;
+    display:flex;
+    gap:10px;
+    border-radius:12px;
+    transition:.2s;
 }
 
 .avatar.small{
@@ -1587,76 +1573,138 @@ body{
   cursor:pointer;
   margin-right:6px;
 }
+.more-menu{
+  position:fixed;
+  bottom:70px;
+  right:10px;
+
+  display:none;
+  flex-direction:column;
+  gap:8px;
+
+  background:white;
+  padding:10px;
+  border-radius:12px;
+
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+  z-index:9999;
+}
+
+.more-menu.show{
+  display:flex;
+}
+.nav-profile{
+  background:#ede9fe;
+  color:#6d28d9;
+}
+
+.nav-settings{
+  background:#eef2ff;
+  color:#4338ca;
+}
+
+.nav-about{
+  background:#f8faff;
+  color:#6366f1;
+}
+
+.nav-donate{
+  background:#fef3c7;
+  color:#7f62d5;
+}
 /* =========================================
    🔥 MOBILE SYSTEM — SINGLE SOURCE OF TRUTH
 ========================================= */
 
-@media (max-width:768px){
+@media (max-width:1024px){
+    /* ===== OVERLAY ===== */
+.mobile-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.3);
+  z-index:9998;
+  display:none;
+}
 
-  /* =========================
-     BASE
-  ========================= */
+.mobile-overlay.active{
+  display:block;
+}
+
+  /* ===== RESET ===== */
   body{
-    padding-bottom:70px;
+    padding-bottom:60px;
+    padding-top:0;
+    margin:0;
   }
 
-  /* =========================
-     LAYOUT → 1 COLUMN
-  ========================= */
   .app-layout{
     display:flex;
     flex-direction:column;
-    padding:10px;
+
+    padding:0;
     gap:12px;
-    height:auto;
+
+    margin:0;
+    min-height:auto;
   }
 
+  /* ===== LEFT (SLIDE) ===== */
+  .left-panel{
+    position:fixed;
+    top:80px;
+    left:-100%;
+
+    width:85%;
+    max-width:360px;
+    height:100vh;
+    max-height:100vh;
+    overflow-y:auto;
+
+    background:white;
+    z-index:9999;
+
+    transition:0.3s;
+    overflow:auto;
+
+  border-radius:16px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.2);
+  }
+
+  .left-panel.active{
+    left:10px;
+  }
+
+  /* ===== CENTER ===== */
   .center-panel{
     width:100%;
   }
 
-  /* =========================
-     LEFT PANEL → SLIDE
-  ========================= */
-  .left-panel{
-    position:fixed;
-    top:0;
-    left:-100%;
-    width:85%;
-    height:100%;
-    background:white;
-    z-index:9999;
-
-    transition:left 0.3s ease;
-    overflow-y:auto;
-  }
-
-  .left-panel.active{
-    left:0;
-  }
-
-  /* =========================
-     RIGHT PANEL = CHAT MOBILE
-  ========================= */
+  /* ===== CHAT FULLSCREEN ===== */
   .right-panel{
     position:fixed;
     inset:0;
-    width:100%;
-    height:100%;
+
+    width:100vw;
+    height:100dvh;
+    max-width:none;
     background:white;
-    z-index:9999;
 
     display:none;
     flex-direction:column;
+
+    z-index:9999;
+    top:0;
+    left:0;
   }
 
   .right-panel.active{
     display:flex;
+    position:fixed;
+    inset:0;
+    z-index:9999;
   }
 
-  /* =========================
-     CHAT FULLSCREEN
-  ========================= */
+  /* ===== CHAT ===== */
   #chat-launcher{
     flex:1;
     display:flex;
@@ -1665,44 +1713,30 @@ body{
 
   .chatbot{
     flex:1;
-    display:flex;
-    flex-direction:column;
-    border-radius:0;
-  }
-
-  .chat-box{
-    position:relative;
-    width:100%;
-    height:100%;
+    border-radius:0 !important;
   }
 
   .chat-messages{
     flex:1;
     overflow-y:auto;
+    min-height:0;
+    scroll-behavior:smooth;
   }
 
-  .message{
-    max-width:90%;
-  }
-
-  /* =========================
-     NAV → BOTTOM BAR
-  ========================= */
+  /* ===== NAV BOTTOM ===== */
   .main-nav{
     position:fixed;
     bottom:0;
     left:0;
+
     width:100%;
     height:60px;
 
     display:flex;
-    align-items:center;
     justify-content:space-around;
 
     background:white;
     border-top:1px solid #eee;
-
-    z-index:1000;
   }
 
   .nav-right{
@@ -1719,86 +1753,79 @@ body{
     display:none;
   }
 
-  .nav-left .nav-home,
-  .nav-left .nav-chat{
-    display:flex;
+  .nav-home,
+  .nav-chat{
+    display:flex !important;
   }
 
-  /* =========================
-     FLOAT BUTTON (PEOPLE)
-  ========================= */
+  /* ===== FLOAT BTN ===== */
   #people-float-btn{
     display:block;
 
     position:fixed;
-    bottom:10px;
-    left:12px;
-
+    bottom:12px;
     z-index:2000;
+  bottom:30px;
+  left:12px;
 
-    background:#6c8cff;
-    color:white;
+  padding:10px 16px;
 
-    padding:10px 14px;
-    border-radius:999px;
+  border:none;
+  border-radius:999px;
 
-    box-shadow:0 6px 20px rgba(0,0,0,.2);
-  }
+  background:linear-gradient(135deg,#6c8cff,#9aaeff);
+  color:white;
 
-  /* =========================
-     MORE MENU
-  ========================= */
+  font-size:13px;
+  font-weight:500;
+
+  box-shadow:0 6px 18px rgba(108,140,255,.35);
+
+  cursor:pointer;
+  transition:.25s;
+}
+
+#people-float-btn:hover{
+  transform:translateY(-2px);
+}
+
+#people-float-btn:active{
+  transform:scale(.95);
+}
+
+  /* ===== MOBILE ONLY ===== */
   .mobile-only{
     display:flex;
   }
 
-  .more-menu{
-    position:fixed;
-    bottom:80px;
-    right:12px;
-
-    background:white;
-    border-radius:16px;
-    padding:10px;
-
-    box-shadow:0 20px 40px rgba(0,0,0,0.2);
-
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-
-    opacity:0;
-    transform:translateY(10px);
-    pointer-events:none;
-
-    transition:.25s;
-    z-index:2000;
-  }
-
-  .more-menu.show{
-    opacity:1;
-    transform:translateY(0);
-    pointer-events:auto;
-  }
-
-  /* =========================
-     MOBILE BACK BUTTON
-  ========================= */
   .mobile-back{
     display:block;
-    border:none;
-    background:none;
-    font-size:20px;
   }
-  .mobile-back:active{
-  transform:scale(0.9);
+  #chat-launcher,
+.chatbot,
+.chat-messages{
+  width:100%;
+  max-width:100%;
 }
+.card{
+    width:100%;
+    max-width:100%;
+    margin:0;
+    padding:16px;
+    border-radius: 0;
+}
+.may-avatar-wrapper{
+  width:40px;
+  height:40px;
+}
+}
+@media (min-width:1025px){
 
-  /* =========================
-     CHART
-  ========================= */
-  .chart-scroll{
-    height:340px;
+  .mobile-only{
+    display:none !important;
   }
 
+  #people-float-btn{
+    display:none !important;
+  }
 }

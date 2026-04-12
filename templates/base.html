@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MâyAI</title>
     {% load static %}
 
@@ -40,10 +40,10 @@
         <a href="/" class="nav-btn nav-home">Trang Chủ</a>
         <a href="/chat/" onclick="handleChatClick(event)" class="nav-btn nav-chat">Mây</a>
         <a href="/feedback/" class="nav-btn nav-feedback">Góp Ý</a>
-        <a href="{% url 'profile' %}" class="nav-btn nav-text">Trang Cá Nhân</a>
-        <a href="{% url 'settings' %}" class="nav-btn nav-text">Cài Đặt</a>
-        <a href="{% url 'about' %}" class="nav-btn nav-text">Giới Thiệu</a>
-        <a href="/donate/" class="nav-btn nav-text">Ủng hộ</a>
+        <a href="{% url 'profile' %}" class="nav-btn nav-text nav-profile">Trang Cá Nhân</a>
+        <a href="{% url 'settings' %}" class="nav-btn nav-text nav-settings">Cài Đặt</a>
+        <a href="{% url 'about' %}" class="nav-btn nav-text nav-about">Giới Thiệu</a>
+        <a href="/donate/" class="nav-btn nav-text nav-donate">Ủng hộ</a>
         <button id="more-btn" class="nav-btn nav-text mobile-only">☰</button>
     </div>
 
@@ -260,7 +260,7 @@ function goNotif(url, id){
 }
 </script>
 
-<div id="more-menu" class="more-menu mobile-only">
+<div id="more-menu" class="more-menu">
     <a href="/feedback/" class="nav-btn">Góp ý</a>
     <a href="{% url 'profile' %}" class="nav-btn">Trang cá nhân</a>
     <a href="{% url 'settings' %}" class="nav-btn">Cài đặt</a>
@@ -271,17 +271,23 @@ function goNotif(url, id){
 const peopleBtn = document.getElementById("people-float-btn");
 
 if (peopleBtn) {
+    const overlay = document.getElementById("mobile-overlay");
+
     peopleBtn.onclick = () => {
         const leftPanel = document.querySelector(".left-panel");
-        if(leftPanel) leftPanel.classList.add("active");
+        if(leftPanel){
+            leftPanel.classList.add("active");
+            overlay.classList.add("active");
+        }
     };
 
     document.addEventListener("click", (e) => {
         const leftPanel = document.querySelector(".left-panel");
-        if (!leftPanel) return;
+        if (!leftPanel||!peopleBtn) return;
 
         if (!leftPanel.contains(e.target) && !peopleBtn.contains(e.target)) {
             leftPanel.classList.remove("active");
+            overlay.classList.remove("active");
         }
     });
 }
@@ -315,5 +321,6 @@ document.addEventListener("click", ()=>{
     }
 });
 </script>
+<div id="mobile-overlay" class="mobile-overlay"></div>
 </body>
 </html>
