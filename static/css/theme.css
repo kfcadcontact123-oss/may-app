@@ -28,7 +28,6 @@ body{
   display:flex;
   flex-direction:column;
   min-height:100vh;
-  padding-top: 60px;
   overflow-x:hidden;
   background: var(--bg);
 }
@@ -1853,5 +1852,12 @@ body{
 
   #people-float-btn{
     display:none !important;
+  }
+    body{
+    padding-top:0;
+  }
+
+  .app-layout{
+    margin-top:0;
   }
 }
