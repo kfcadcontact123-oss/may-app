@@ -29,7 +29,6 @@ DATABASES = {
     }
 }
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-key")
-CRON_SECRET = os.getenv("CRON_SECRET")
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 #ALLOWED_HOSTS = ['*']

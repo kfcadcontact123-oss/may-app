@@ -6,7 +6,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from stress_app.views import donate, profile_view
 from accounts.views import change_password_custom
-from stress_app.views_jobs import run_daily_stress
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,7 +29,6 @@ urlpatterns = [
     path("profile/<int:user_id>/", profile_view, name="profile"),
     path("accounts/change-password/", change_password_custom, name="change_password"),
     path("", include("stress_app.urls")),
-    path("jobs/daily-stress/", run_daily_stress),
 ]
 # 🔥 PHẢI CỘNG THÊM, KHÔNG GÁN
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
