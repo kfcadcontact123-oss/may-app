@@ -5,18 +5,27 @@ from django.db.models import Q
 from accounts.services.notification_service import notify_like, notify_reply, notify_heart
 from django.contrib.auth.models import User
 from accounts.services.notification_service import create_notification
+from django.db.models import Prefetch
 
 @login_required
 def feedback_page(request):
     filter_type = request.GET.get("filter", "all")
-    query = request.GET.get("q")
+    query = request.GET.get("q", "").strip()
 
-    feedbacks = Feedback.objects.select_related("user", "user__usermemory")
+    feedbacks = Feedback.objects.select_related(
+        "user", "user__usermemory"
+    ).prefetch_related(
+        Prefetch(
+            "replies",
+            queryset=FeedbackReply.objects.select_related("user")
+        )
+    )
 
     # 🔍 SEARCH
     if query:
         feedbacks = feedbacks.filter(
             Q(user__username__icontains=query) |
+            Q(user__first_name__icontains=query) |
             Q(content__icontains=query)
         )
 
@@ -27,7 +36,8 @@ def feedback_page(request):
     feedbacks = feedbacks.order_by("-created_at")
 
     return render(request, "feedback/page.html", {
-        "feedbacks": feedbacks
+        "feedbacks": feedbacks,
+        "query":query
     })
 
 @login_required

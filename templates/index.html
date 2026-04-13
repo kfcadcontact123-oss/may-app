@@ -151,8 +151,51 @@
 document.addEventListener("DOMContentLoaded", function(){
 
 let stressData = JSON.parse('{{ stress_data|escapejs }}');
+// =========================
+// FIX NULL → FILL DATA
+// =========================
 let stressLabels = JSON.parse('{{ stress_labels|escapejs }}');
 let avgData = JSON.parse('{{ avg_data|escapejs }}');
+const today = new Date();
+const todayStr =
+    String(today.getDate()).padStart(2,'0') + "/" +
+    String(today.getMonth()+1).padStart(2,'0');
+const todayIndex = stressLabels.indexOf(todayStr);
+
+// =========================
+// FIX NULL (CHUẨN LOGIC)
+// =========================
+
+// =========================
+// FIX NULL (FINAL CHUẨN)
+// =========================
+
+let firstRealIndex = stressData.findIndex(v => v !== null);
+
+if(firstRealIndex === -1){
+
+    // user chưa có data → chỉ set hôm nay
+    if(todayIndex !== -1){
+        stressData[todayIndex] = 30;
+    }
+
+}else{
+
+    // ❗ KHÔNG đụng vào quá khứ
+
+    for(let i = firstRealIndex; i <= todayIndex; i++){
+
+        if(stressData[i] === null){
+
+            if(i === firstRealIndex){
+                stressData[i] = 30; // fallback ngày đầu
+            }else{
+                stressData[i] = stressData[i-1];
+            }
+        }
+    }
+}
+
 
 /* =========================
    ALIGN

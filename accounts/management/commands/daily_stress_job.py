@@ -13,37 +13,43 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
 
         today = date.today()
-        yesterday = today - timedelta(days=1)
+        target_day = today - timedelta(days=1)  # 🔥 tính hôm qua
 
         users = User.objects.all()
 
         for user in users:
 
+            # ❗ tránh duplicate
+            if DailyStress.objects.filter(user=user, created_at=target_day).exists():
+                continue
+
+            # ❗ nếu chưa có data lịch sử → skip (ngày đầu)
+            if DailyStress.objects.filter(user=user).count() == 0:
+                continue
+
             # 🔥 tính điểm
             score = calculate_stress(user, emotion="neutral")
 
-            # 🔥 lấy hôm qua
+            # 🔥 lấy hôm trước nữa (để so trend)
+            yesterday = target_day - timedelta(days=1)
+
             yesterday_obj = DailyStress.objects.filter(
                 user=user,
                 created_at=yesterday
             ).first()
-            if yesterday_obj:
-                diff = score - yesterday_obj.score
-            else:
-                diff = 0
 
+            diff = score - yesterday_obj.score if yesterday_obj else 0
+
+            # 🔥 lấy chat gần đây
             recent_msgs = ChatMessage.objects.filter(
                 user=user
-            ).order_by("-created_at")[:6]  # 🔥 giảm còn 6 cho chất lượng
+            ).order_by("-created_at")[:6]
 
             chat_context = "\n".join([
                 f"User: {m.message}\nMây: {m.response}"
                 for m in reversed(recent_msgs)
             ])
 
-            # =============================
-            # 🔥 LENGTH HINT (QUAN TRỌNG)
-            # =============================
             message_count = len(recent_msgs)
 
             if message_count == 0:
@@ -55,7 +61,7 @@ class Command(BaseCommand):
             else:
                 data_level = "high"
 
-            # 🔥 phân loại biến động stress
+            # 🔥 trend
             if diff >= 15:
                 trend = "increase_strong"
             elif diff >= 5:
@@ -67,99 +73,50 @@ class Command(BaseCommand):
             else:
                 trend = "stable"
 
-            extra_context = f"""
-CHAT:
-{chat_context}
-
-META:
-- score_today: {score}
-- score_yesterday: {yesterday_obj.score if yesterday_obj else "N/A"}
-- diff: {diff}
-- trend: {trend}
-- message_count: {message_count}
-- data_level: {data_level}
-
-HƯỚNG DẪN:
-- BẮT BUỘC phải nhắc đến xu hướng stress (tăng/giảm/ổn định)
-- Nếu tăng mạnh → nói rõ có biến động đáng chú ý
-- Nếu giảm → nói theo hướng tích cực
-- Nếu ổn định → nói trạng thái cân bằng
-"""
-
-            # =============================
-            # 🔥 AI chỉ generate 1 câu cảm xúc
-            # =============================
+            # 🔥 AI cảm xúc
             feel_text = generate_ai_reply(
                 user=user,
                 mode="recap_feel"
-                )
-            # =============================
-            # 🔥 TEMPLATE SYSTEM
-            # =============================
+            )
 
-            trend_map = {
-                    "increase_strong": "áp lực đang tăng lên khá rõ",
-                    "increase": "có vẻ áp lực tăng nhẹ",
-                    "decrease_strong": "mọi thứ đã dịu lại nhiều",
-                    "decrease": "có vẻ bạn đã nhẹ lòng hơn",
-                    "stable": "mọi thứ đang khá ổn định"
-                    }
-
-            trend_text = trend_map.get(trend, "có một chút biến động")
-
-            # 👉 fallback nếu AI lỗi
             if not feel_text or len(feel_text) < 10:
                 feel_text = "Hôm nay có nhiều cảm xúc đan xen."
 
-            # 👉 đảm bảo kết thúc câu
             if not feel_text.endswith((".", "!", "?")):
                 feel_text += "."
+
+            trend_map = {
+                "increase_strong": "áp lực đang tăng lên khá rõ",
+                "increase": "có vẻ áp lực tăng nhẹ",
+                "decrease_strong": "mọi thứ đã dịu lại nhiều",
+                "decrease": "có vẻ bạn đã nhẹ lòng hơn",
+                "stable": "mọi thứ đang khá ổn định"
+            }
+
+            trend_text = trend_map.get(trend, "có một chút biến động")
+
             ai_text = f"""
 {feel_text}
 
-Hôm nay {trend_text}.
-Dù có lúc chưa thoải mái, bạn vẫn đang cố gắng từng chút một.
-Tối nay thử nghỉ ngơi nhẹ một chút nhé.
-Ngày mai cứ bắt đầu chậm thôi, không cần vội.
+Hôm qua {trend_text}.
+Bạn vẫn đang cố gắng từng chút một.
+Hôm nay cứ bắt đầu nhẹ nhàng thôi nhé.
 """.strip()
-            import random
 
-            endings = [
-    "Mây vẫn ở đây với bạn.",
-    "Không sao đâu, cứ từ từ thôi nhé.",
-    "Bạn không cần phải làm mọi thứ hoàn hảo đâu."
-]
-
-            ending = endings[hash(user.id) % len(endings)]
-            ai_text += "\n" + ending
-
-            print("========== DEBUG AI ==========")
-            print("AI TEXT RAW:\n", repr(ai_text))
-            print("========== END ==========")
-
-            # 🔥 lưu DB
-            obj = DailyStress.objects.filter(
+            # 🔥 lưu DB (CHÍNH XÁC ngày hôm qua)
+            DailyStress.objects.create(
                 user=user,
-                created_at=today
-            ).first()
+                score=score,
+                ai_analysis=ai_text,
+                created_at=target_day
+            )
 
-            if obj:
-                obj.score = score
-                obj.ai_analysis = ai_text
-                obj.save()
-            else:
-                DailyStress.objects.create(
-                    user=user,
-                    score=score,
-                    ai_analysis=ai_text
-                )
-
-            # 🔥 notification (chỉ tóm tắt)
+            # 🔥 notification
             create_notification(
                 user,
-                f"Điểm căng thẳng hôm nay của bạn là: {score}, xem chi tiết để biết thêm.",
+                f"Điểm stress hôm qua của bạn là: {score}",
                 "stress",
-                target_url=f"/stress/{today}/"
+                target_url=f"/stress/{target_day}/"
             )
 
         self.stdout.write("DONE DAILY STRESS")

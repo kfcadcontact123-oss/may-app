@@ -30,6 +30,7 @@ body{
   min-height:100vh;
   padding-top: 60px;
   overflow-x:hidden;
+  background: var(--bg);
 }
 
 /* =========================
@@ -56,6 +57,7 @@ body{
   border-radius:var(--radius);
   box-shadow:0 10px 30px rgba(0,0,0,.06);
   padding:18px;
+  overflow:hidden;
 }
 
 /* =========================
@@ -344,7 +346,7 @@ body{
 
 .main-nav{
   display:flex;
-  justify-content:space-between;
+  justify-content:flex-start;
   align-items:center;
   position: sticky;
   top: 0;
@@ -427,17 +429,19 @@ body{
 
 .chart-scroll{
     flex:unset;   
-    height:400px;
+    height:auto;
     display:flex;
     flex-direction:column;
-    min-height:0;           /* ⭐ cực quan trọng để tránh tràn */
+    min-height:0;
+    gap:12px;
 }
 
 .chart-scroll canvas{
-    flex:1;
     min-height:0;
     width:100% !important;
-    height:100% !important;
+    height:auto !important;
+    display:block;
+    aspect-ratio: 2 / 1; 
 }
 .may-avatar-wrapper {
     width: 40px;               /* ép khung cố định */
@@ -589,6 +593,8 @@ body{
     margin: 12px 0;
     font-size: 15px;
     line-height:1.5;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 /* ACTIONS */
@@ -699,6 +705,18 @@ body{
 .nav-text:hover{
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(108,140,255,.35);
+}
+.nav-left{
+  display:flex;
+  gap:10px;        /* khoảng cách giữa các nút */
+  flex-wrap:nowrap;
+  overflow-x: auto;
+}
+.nav-right{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 .feedback-top{
     display:flex;
@@ -1633,7 +1651,7 @@ body{
   /* ===== RESET ===== */
   body{
     padding-bottom:60px;
-    padding-top:0;
+    padding-top:60px;
     margin:0;
   }
 
@@ -1733,7 +1751,7 @@ body{
     height:60px;
 
     display:flex;
-    justify-content:space-around;
+    justify-content:flex-start;
 
     background:white;
     border-top:1px solid #eee;
@@ -1746,7 +1764,7 @@ body{
   .nav-left{
     width:100%;
     display:flex;
-    justify-content:space-around;
+    justify-content:flex-start;
   }
 
   .nav-left a{
@@ -1813,11 +1831,19 @@ body{
     margin:0;
     padding:16px;
     border-radius: 0;
+    overflow:hidden
 }
 .may-avatar-wrapper{
   width:40px;
   height:40px;
 }
+.chart-scroll{
+      height:auto;
+  }
+
+  .chart-scroll canvas{
+      height:auto !important;
+  }
 }
 @media (min-width:1025px){
 
