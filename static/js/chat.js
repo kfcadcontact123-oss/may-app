@@ -3,7 +3,11 @@ console.log("CHAT VERSION 1000000001");
 /* =========================
    🔥 PERSIST STATE (FIX RESET)
 ========================= */
-
+let lastBotMessage = "";
+let isSending = false;
+let lastSendTime = 0;
+const activePolls = new Set();
+let renderedMessages = new Set();
 const todayKey = new Date().toISOString().slice(0, 10);
 function getChatBox(){
     return document.getElementById("chat-box");
@@ -218,45 +222,33 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
         behavior: "smooth"
     });
 }
+function pollMessage(messageId) {
 
-    /* =========================
-       SEND MESSAGE
-    ========================= */
-
-    async function sendMessage() {
-
-        const message = input.value.trim();
-        if (!message) return;
-
-        input.value = "";
-        input.style.height = "auto";
-
-        addUserMessage(message);
-        showTyping();
-        function pollMessage(messageId) {
+    // ❌ nếu đã poll rồi thì bỏ
+    if (activePolls.has(messageId)) return;
+    activePolls.add(messageId);
+    let isDone = false;
 
     const interval = setInterval(async () => {
+        if (isDone) return;
 
         try {
             const res = await fetch(`/chat/status/${messageId}/`);
             const data = await res.json();
-            console.log("API RESPONSE:", data);
-            console.log("POLL:", data); // debug
 
-            // 🔥 FIX QUAN TRỌNG
-            if (!data || !data.response) {
-                return; // chưa có data → tiếp tục poll
-            }
+            if (!data || !data.response) return;
+            if (data.response === "__thinking__") return;
+            isDone = true;
 
-            if (data.response === "__thinking__") {
-                return; // vẫn đang xử lý
-            }
-
-            // ✅ chỉ chạy khi có response thật
             clearInterval(interval);
+            activePolls.delete(messageId);
 
             removeTyping();
-            typeBotMessage(data.response);
+            typeBotMessage(data.response, messageId);
+
+            // 🔥 mở lại gửi
+            isSending = false;
+            sendBtn.disabled = false;
 
         } catch (e) {
             console.error("Polling error:", e);
@@ -265,31 +257,51 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
     }, 1500);
 }
 
-        try {
-            const res = await fetch("/chat/api/", {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": getCookie("csrftoken")
-                },
-                body: JSON.stringify({ message })
-            });
-            if (!res.ok) {
-    const text = await res.text();
-    console.error("SERVER RESPONSE:", text);
-    throw new Error("Server error");
-}
+    /* =========================
+       SEND MESSAGE
+    ========================= */
 
-            const data = await res.json();
+    async function sendMessage() {
+    const now = Date.now();
 
-            pollMessage(data.message_id);
+    // ❌ chặn spam click + mobile double trigger
+    if (isSending || now - lastSendTime < 800) return;
+    lastSendTime = now;
 
-        } catch (e) {
-            removeTyping();
-            typeBotMessage("Không kết nối được với máy chủ AI.");
-        }
+    const message = input.value.trim();
+    if (!message) return;
+
+    isSending = true;
+    sendBtn.disabled = true;
+
+    input.value = "";
+    input.style.height = "auto";
+
+    addUserMessage(message);
+    showTyping();
+
+    try {
+        const res = await fetch("/chat/api/", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
+            },
+            body: JSON.stringify({ message })
+        });
+
+        const data = await res.json();
+
+        pollMessage(data.message_id);
+
+    } catch (e) {
+        removeTyping();
+        typeBotMessage("Không kết nối được với máy chủ AI.");
+        isSending = false;
+        sendBtn.disabled = false;
     }
+}
 
     input.addEventListener("keydown", e => {
         if (e.key === "Enter" && !e.shiftKey) {
@@ -298,7 +310,10 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
         }
     });
 
-    sendBtn.onclick = sendMessage;
+    sendBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    sendMessage();
+});
 
     /* =========================
        UI
@@ -328,7 +343,10 @@ document.querySelectorAll(".voice-btn").forEach(btn => {
         document.getElementById("typing")?.remove();
     }
 
-    function typeBotMessage(text) {
+    function typeBotMessage(text, messageId) {
+
+    if (renderedMessages.has(messageId)) return;
+    renderedMessages.add(messageId);
         
 
     const div = document.createElement("div");
