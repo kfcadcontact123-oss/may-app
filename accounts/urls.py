@@ -5,7 +5,7 @@ from .views import signup_view
 from .views import profile_settings
 from .views import delete_account
 from .views import profile_view, about_view, verify_email, check_email
-from .views import upload_avatar
+from .views import upload_avatar, resend_login_link
 from .views_notification import *
 from .views import search_user
 from accounts.views import login_view, login_with_token, send_login_link
@@ -54,9 +54,9 @@ urlpatterns = [
     path("notif/delete/<int:id>/", delete_notification, name="notif_delete"),
     path("notif/<int:id>/", notification_detail, name="notif_detail"),
     path("notif/api/", notif_api, name="notif_api"),
-    path("login/", login_view, name="login"),
     path("verify/<uidb64>/<token>/", verify_email, name="verify_email"),
     path("check-email/", check_email, name="check_email"),
     path("login-link/", send_login_link, name="login_link"),
     path("login-token/<uidb64>/<token>/",login_with_token, name="login_with_token"),
+    path("resend-login-link/", resend_login_link, name="resend_login_link"),
 ]

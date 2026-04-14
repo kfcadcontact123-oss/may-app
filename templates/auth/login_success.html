@@ -1,0 +1,24 @@
+{% extends "auth_base.html" %}
+
+{% block content %}
+<div class="auth-page">
+<div class="auth-card">
+
+    <h2>Đăng nhập thành công </h2>
+    <p class="auth-sub">
+        Bạn đã đăng nhập vào Mây.<br>
+        Đang chuyển về trang chủ...
+    </p>
+
+    <a href="/" class="auth-btn">Về trang chủ ngay</a>
+
+</div>
+</div>
+
+<script>
+    setTimeout(() => {
+        window.location.href = "/";
+    }, 5000);
+</script>
+
+{% endblock %}

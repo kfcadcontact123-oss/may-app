@@ -16,14 +16,13 @@
     <div class="auth-card">
 
         <h2>Welcome back</h2>
-        <p class="auth-sub">Mây luôn ở đây, giúp đỡ và chữa lành cho bạn nhé.</p>
+        <p class="auth-sub">Hãy điền email và mật khẩu, Mây sẽ gửi cho bạn đường dẫn xác thực nhé</p>
 
         <form method="post">
             {% csrf_token %}
-
             {% if error %}
 <div class="auth-error">
-    Email hoặc mật khẩu không đúng
+    {{ error }}
 </div>
 {% endif %}
             <!-- EMAIL -->
@@ -50,7 +49,7 @@
             </div>
             
 
-            <button class="auth-btn">Đăng nhập</button>
+            <button class="auth-btn">Tiếp tục xác thực</button>
         </form>
 
         <a href="{% url 'signup' %}" class="auth-link">

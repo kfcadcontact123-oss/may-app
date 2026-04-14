@@ -1,0 +1,26 @@
+{% extends "auth_base.html" %}
+
+{% block content %}
+<div class="auth-page">
+<div class="auth-card">
+
+    <h2>Link không hợp lệ </h2>
+
+    <p class="auth-sub">
+        Link đăng nhập đã hết hạn hoặc không hợp lệ.<br>
+        Bạn có thể yêu cầu gửi lại link mới.
+    </p>
+
+    {% if email %}
+    <form method="post" action="{% url 'resend_login_link' %}">
+        {% csrf_token %}
+        <input type="hidden" name="email" value="{{ email }}">
+        <button class="auth-btn">Gửi lại link</button>
+    </form>
+    {% else %}
+        <a href="{% url 'login' %}" class="auth-btn">Quay lại đăng nhập</a>
+    {% endif %}
+
+</div>
+</div>
+{% endblock %}
