@@ -1,30 +1,80 @@
 from chat.models import ChatMessage
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from .models import DailyStress
-from chat.models import UserMemory
 from django.db.models import Q, Avg
 import json
 from datetime import timedelta, date
 import math
 
 
+# =====================================
+# HOME
+# =====================================
 @login_required
 def home(request):
     request.user.refresh_from_db()
     user = request.user
     today = date.today()
 
+    # ===== RECAP (LUÔN CÓ) =====
+    yesterday = today - timedelta(days=1)
+
+    recap_obj = DailyStress.objects.filter(
+        user=user,
+        created_at=yesterday
+    ).first()
+
+    # fallback nếu chưa có (KHÔNG phụ thuộc cron)
+    if not recap_obj:
+        class TempRecap:
+            def __init__(self):
+                self.score = 30
+                self.ai_analysis = "Hôm qua có vẻ bạn khá yên tĩnh. Mong là bạn đang ổn theo cách của riêng mình."
+
+        recap = TempRecap()
+    else:
+        recap = recap_obj
+
+    # ===== DIFF =====
+    recap_diff = None
+    recap_diff_abs = None
+
+    prev_day = yesterday - timedelta(days=1)
+
+    prev = DailyStress.objects.filter(
+        user=user,
+        created_at=prev_day
+    ).first()
+
+    if prev:
+        recap_diff = recap.score - prev.score
+        recap_diff_abs = abs(recap_diff)
+
+    # ===== FORECAST =====
+    recent = list(
+        DailyStress.objects.filter(user=user)
+        .order_by("-created_at")
+        .values_list("score", flat=True)[:7]
+    )
+
+    recent = list(reversed(recent))
+
+    if len(recent) >= 2:
+        forecast = predict_next_stress(recent)
+        recap_forecast_text = f"{forecast}/100"
+    elif len(recent) == 1:
+        recap_forecast_text = "Cần thêm dữ liệu"
+    else:
+        recap_forecast_text = "Chưa có dữ liệu"
+
     # =====================================
-    # 14 NGÀY (7 quá khứ + 7 tương lai)
+    # 14 NGÀY
     # =====================================
     past_days = [today - timedelta(days=i) for i in range(6, -1, -1)]
     future_days = [today + timedelta(days=i) for i in range(1, 8)]
 
-    # =====================================
-    # FETCH DATA (TỐI ƯU)
-    # =====================================
     user_records = {
         r.created_at: r.score
         for r in DailyStress.objects.filter(
@@ -40,9 +90,6 @@ def home(request):
         ).values("created_at").annotate(avg=Avg("score"))
     }
 
-    # =====================================
-    # BUILD DATA
-    # =====================================
     stress_data = []
     avg_data = []
 
@@ -54,23 +101,17 @@ def home(request):
     stress_data += [None] * 7
     avg_data += [None] * 7
 
-    # =====================================
-    # TODAY STRESS
-    # =====================================
+    # ===== TODAY =====
     stress_today = next(
         (s for s in reversed(stress_data[:7]) if s is not None),
         30
     )
 
-    # =====================================
-    # LABELS
-    # =====================================
+    # ===== LABELS =====
     labels = [d.strftime("%d/%m") for d in (past_days + future_days)]
     start_date = past_days[0].strftime("%Y-%m-%d")
 
-    # =====================================
-    # SPECIAL CARE
-    # =====================================
+    # ===== SPECIAL CARE =====
     special_care = False
     streak = 0
 
@@ -83,9 +124,7 @@ def home(request):
         else:
             break
 
-    # =====================================
-    # STATUS
-    # =====================================
+    # ===== STATUS =====
     def get_status(score):
         if score < 30:
             return "Very Relaxed"
@@ -102,20 +141,15 @@ def home(request):
 
     status = get_status(stress_today)
 
-    # =====================================
-    # CHAT (OPTIMIZED)
-    # =====================================
+    # ===== CHAT =====
     messages = ChatMessage.objects.filter(
         user=user
     ).select_related("user").order_by("created_at")
 
-    # =====================================
-    # SUGGESTED USERS (FIX + OPTIMIZE)
-    # =====================================
+    # ===== SUGGEST USER =====
     query = request.GET.get("q", "").strip()
 
-    base_users = User.objects.exclude(id=user.id)\
-        .select_related("usermemory")
+    base_users = User.objects.exclude(id=user.id).select_related("usermemory")
 
     if query:
         base_users = base_users.filter(
@@ -144,9 +178,7 @@ def home(request):
     else:
         suggested_users = list(base_users[:5])
 
-    # =====================================
-    # JSON
-    # =====================================
+    # ===== CONTEXT =====
     context = {
         "stress_today": stress_today,
         "suggested_users": suggested_users,
@@ -158,16 +190,29 @@ def home(request):
         "special_care": special_care,
         "stress_labels": json.dumps(labels),
         "query": query,
+
+        # 🔥 recap mới
+        "recap": recap,
+        "recap_diff": recap_diff,
+        "recap_diff_abs": recap_diff_abs,
+        "recap_forecast_text": recap_forecast_text,
+        "recap_date": yesterday.strftime("%Y-%m-%d"),
     }
 
     return render(request, "index.html", context)
 
 
+# =====================================
+# DONATE
+# =====================================
 @login_required
 def donate(request):
     return render(request, "donate.html")
 
 
+# =====================================
+# PROFILE
+# =====================================
 @login_required
 def profile_view(request, user_id):
     profile_user = get_object_or_404(
@@ -254,19 +299,28 @@ def predict_next_stress(stress_list):
     return round(max(20, min(95, predicted)))
 
 
+# =====================================
+# DETAIL
+# =====================================
 @login_required
 def stress_detail_view(request, date):
     from datetime import datetime
 
     date = datetime.strptime(date, "%Y-%m-%d").date()
 
-    stress = get_object_or_404(
-        DailyStress,
+    stress = DailyStress.objects.filter(
         user=request.user,
         created_at=date
-    )
+    ).first()
+
+    if not stress:
+        stress = DailyStress(
+            score=30,
+            ai_analysis="Hôm đó bạn có vẻ khá yên tĩnh. Mong là bạn vẫn ổn."
+        )
 
     yesterday = date - timedelta(days=1)
+
     yesterday_obj = DailyStress.objects.filter(
         user=request.user,
         created_at=yesterday
@@ -279,18 +333,18 @@ def stress_detail_view(request, date):
         diff = stress.score - yesterday_obj.score
         diff_abs = abs(diff)
 
-    recent_stress = list(
+    recent = list(
         DailyStress.objects.filter(user=request.user)
         .order_by("-created_at")
         .values_list("score", flat=True)[:7]
     )
 
-    recent_stress = list(reversed(recent_stress))
-    forecast = predict_next_stress(recent_stress)
+    recent = list(reversed(recent))
+    forecast = predict_next_stress(recent)
 
-    if len(recent_stress) == 0:
+    if len(recent) == 0:
         forecast_text = "Chưa có dữ liệu stress nào."
-    elif len(recent_stress) == 1:
+    elif len(recent) == 1:
         forecast_text = "Cần ít nhất 2 ngày để dự đoán xu hướng."
     else:
         forecast_text = f"{forecast}/100"
@@ -302,3 +356,11 @@ def stress_detail_view(request, date):
         "forecast": forecast,
         "forecast_text": forecast_text
     })
+
+
+# =====================================
+# REDIRECT RECAP
+# =====================================
+def latest_recap(request):
+    yesterday = date.today() - timedelta(days=1)
+    return redirect(f"/stress/{yesterday}/")

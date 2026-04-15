@@ -1,5 +1,3 @@
-from google.cloud import texttospeech
-from google.oauth2 import service_account
 import hashlib
 import os
 import json
@@ -13,6 +11,10 @@ CACHE_DIR = os.path.join(BASE_DIR, "media", "voice_cache")
 
 def get_tts_client():
     try:
+        # 🔥 lazy import để tránh load lúc boot
+        from google.oauth2 import service_account
+        from google.cloud import texttospeech
+
         if "GOOGLE_APPLICATION_CREDENTIALS_JSON" in os.environ:
             info = json.loads(os.environ["GOOGLE_APPLICATION_CREDENTIALS_JSON"])
             credentials = service_account.Credentials.from_service_account_info(info)
@@ -25,10 +27,6 @@ def get_tts_client():
         # ❌ không raise lỗi ra ngoài
         logger.warning(f"TTS init failed, fallback to None: {e}")
         return None
-
-
-# tạo client 1 lần
-client = get_tts_client()
 
 
 def get_cache_path(text):
@@ -47,15 +45,25 @@ def synthesize_voice(text):
     os.makedirs(CACHE_DIR, exist_ok=True)
     path = get_cache_path(text)
 
-    # 👉 nếu đã có cache → dùng luôn
+    # 👉 nếu đã có cache → dùng luôn (tránh load TTS)
     if os.path.exists(path):
         with open(path, "rb") as f:
             return f.read()
 
+    # 🔥 lazy import ở đây (chỉ khi cache miss)
+    try:
+        from google.cloud import texttospeech
+    except Exception as e:
+        logger.warning(f"TTS import failed: {e}")
+        return b""
+
+    # 👉 tạo client tại runtime (không giữ global)
+    client = get_tts_client()
+
     # 👉 nếu client lỗi → không crash
     if client is None:
         logger.warning("TTS client unavailable")
-        return b""  # trả audio rỗng thay vì crash
+        return b""  # giữ nguyên behavior
 
     formatted_text = format_may_voice(text)
 
@@ -80,7 +88,7 @@ def synthesize_voice(text):
         )
     except Exception as e:
         logger.warning(f"TTS synthesize failed: {e}")
-        return b""  # fallback nhẹ
+        return b""  # giữ nguyên behavior
 
     # 👉 save cache (fail cũng không chết)
     try:
@@ -88,5 +96,11 @@ def synthesize_voice(text):
             f.write(response.audio_content)
     except Exception as e:
         logger.warning(f"Cache write failed: {e}")
+
+    # 🔥 giải phóng nhẹ (giúp GC nhanh hơn)
+    try:
+        del client
+    except:
+        pass
 
     return response.audio_content

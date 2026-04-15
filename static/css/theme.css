@@ -1629,6 +1629,65 @@ body{
   background:#fef3c7;
   color:#7f62d5;
 }
+.recap-card{
+    padding:18px;
+    margin-top:12px;
+}
+
+.recap-card .score-box{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    margin-bottom:10px;
+}
+
+.recap-card .score-number{
+    font-size:32px;
+    font-weight:700;
+    color:#3b82f6;
+}
+
+.recap-card .score-label{
+    font-size:14px;
+    opacity:0.6;
+}
+
+.recap-card .diff-box{
+    margin-bottom:12px;
+    padding:8px 12px;
+    border-radius:8px;
+    font-size:13px;
+}
+
+.recap-card .diff-box.increase{
+    background:#fff1f2;
+    color:#dc2626;
+}
+
+.recap-card .diff-box.decrease{
+    background:#ecfdf5;
+    color:#16a34a;
+}
+
+.recap-card .diff-box.stable{
+    background:#f1f5f9;
+    color:#475569;
+}
+
+.recap-card .ai-box{
+    font-size:14px;
+    line-height:1.5;
+    margin-bottom:10px;
+    color:#334155;
+}
+
+.recap-card .forecast-box{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    border-top:1px solid rgba(0,0,0,0.08);
+    padding-top:8px;
+}
 /* =========================================
    🔥 MOBILE SYSTEM — SINGLE SOURCE OF TRUTH
 ========================================= */
@@ -1693,6 +1752,7 @@ body{
 
   /* ===== CENTER ===== */
   .center-panel{
+    padding-bottom:130px;
     width:100%;
   }
 

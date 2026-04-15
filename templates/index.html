@@ -132,6 +132,52 @@
 </div>
             <canvas id="stressChart"></canvas>
         </div>
+{% if recap %}
+<div class="mobile-only">
+
+    <div class="card recap-card">
+
+        <h3>🧠 Hôm qua của bạn</h3>
+
+        <!-- SCORE -->
+        <div class="score-box">
+            <div class="score-number">{{ recap.score }}</div>
+            <div class="score-label">/100</div>
+        </div>
+
+        <!-- DIFF -->
+        {% if recap_diff is not None %}
+        <div class="diff-box
+            {% if recap_diff > 0 %}increase
+            {% elif recap_diff < 0 %}decrease
+            {% else %}stable
+            {% endif %}
+        ">
+            {% if recap_diff > 0 %}
+                Áp lực tăng (+{{ recap_diff }})
+            {% elif recap_diff < 0 %}
+                Nhẹ hơn (−{{ recap_diff_abs }})
+            {% else %}
+                Ổn định 🌿
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- AI -->
+        <div class="ai-box">
+            {{ recap.ai_analysis }}
+        </div>
+
+        <!-- FORECAST -->
+        <div class="forecast-box">
+            <span>Ngày mai</span>
+            <b>{{ recap_forecast_text }}</b>
+        </div>
+
+    </div>
+
+</div>
+{% endif %}
 
     </main>
 
