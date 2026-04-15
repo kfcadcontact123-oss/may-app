@@ -14,16 +14,15 @@ CACHE_DIR = os.path.join(BASE_DIR, "media", "voice_cache")
 def get_tts_client():
     try:
         if "GOOGLE_APPLICATION_CREDENTIALS_JSON" in os.environ:
-            info = json.loads(os.environ["GOOGLE_APPLICATION_CREDENTIALS_JSON"])
-            credentials = service_account.Credentials.from_service_account_info(info)
+            path = os.environ["GOOGLE_APPLICATION_CREDENTIALS_JSON"]
+
+            credentials = service_account.Credentials.from_service_account_file(path)
             return texttospeech.TextToSpeechClient(credentials=credentials)
 
-        # 👉 fallback: dùng default credentials (nếu có)
         return texttospeech.TextToSpeechClient()
 
     except Exception as e:
-        # ❌ không raise lỗi ra ngoài
-        logger.warning(f"TTS init failed, fallback to None: {e}")
+        logger.warning(f"TTS init failed: {e}")
         return None
 
 
