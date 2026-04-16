@@ -11,8 +11,8 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
-DEBUG = os.getenv("DEBUG", "False") == "True"
-#DEBUG = True
+#DEBUG = os.getenv("DEBUG", "False") == "True"
+DEBUG = True
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -30,10 +30,10 @@ DATABASES = {
 }
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-key")
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
-#ALLOWED_HOSTS = ['*']
-
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+#ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = ['*']
+csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "")
+CSRF_TRUSTED_ORIGINS = [o for o in csrf_origins.split(",") if o]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 INSTALLED_APPS = [
     'django.contrib.admin',

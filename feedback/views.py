@@ -17,7 +17,10 @@ def feedback_page(request):
     ).prefetch_related(
         Prefetch(
             "replies",
-            queryset=FeedbackReply.objects.select_related("user")
+            queryset=FeedbackReply.objects.select_related(
+                "user",
+                "user__usermemory"
+                )
         )
     )
 
@@ -50,12 +53,12 @@ def add_feedback(request):
                 user=request.user,
                 content=content
             )
-            dev = User.objects.get(id=1)
+            dev = User.objects.only("id").get(id=1)
 
             if dev != request.user:
                 create_notification(
                     dev,
-                    f"📩 {request.user.username} đã gửi feedback mới",
+                    f" {request.user.first_name} đã gửi feedback mới",
                     "feedback",
                     target_url="/feedback/"
                 )

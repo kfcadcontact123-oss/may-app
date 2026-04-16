@@ -2,7 +2,6 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from datetime import date, timedelta
 from chat.models import ChatMessage
-import random
 
 from stress_app.models import DailyStress
 from stress_app.stress_engine import calculate_stress
@@ -14,131 +13,153 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
 
         today = date.today()
+        yesterday = today - timedelta(days=1)
+
         users = User.objects.all()
 
         for user in users:
 
-            # 🔥 Lấy ngày cuối cùng đã có trong DB
-            last_record = DailyStress.objects.filter(user=user).order_by("-created_at").first()
+            # 🔥 tính điểm
+            score = calculate_stress(user, emotion="neutral")
 
-            if last_record:
-                start_day = last_record.created_at + timedelta(days=1)
+            # 🔥 lấy hôm qua
+            yesterday_obj = DailyStress.objects.filter(
+                user=user,
+                created_at=yesterday
+            ).first()
+            if yesterday_obj:
+                diff = score - yesterday_obj.score
             else:
-                start_day = today - timedelta(days=1)
+                diff = 0
 
-            current_day = start_day
+            recent_msgs = ChatMessage.objects.filter(
+                user=user
+            ).order_by("-created_at")[:6]  # 🔥 giảm còn 6 cho chất lượng
 
-            while current_day < today:
+            chat_context = "\n".join([
+                f"User: {m.message}\nMây: {m.response}"
+                for m in reversed(recent_msgs)
+            ])
 
-                # 🔥 lấy hôm trước (để kế thừa + trend)
-                yesterday = current_day - timedelta(days=1)
+            # =============================
+            # 🔥 LENGTH HINT (QUAN TRỌNG)
+            # =============================
+            message_count = len(recent_msgs)
 
-                yesterday_obj = DailyStress.objects.filter(
-                    user=user,
-                    created_at=yesterday
-                ).first()
+            if message_count == 0:
+                data_level = "none"
+            elif message_count <= 2:
+                data_level = "low"
+            elif message_count <= 5:
+                data_level = "medium"
+            else:
+                data_level = "high"
 
-                # 🔥 lấy chat gần đây
-                recent_msgs = ChatMessage.objects.filter(
-                    user=user
-                ).order_by("-created_at")[:6]
+            # 🔥 phân loại biến động stress
+            if diff >= 15:
+                trend = "increase_strong"
+            elif diff >= 5:
+                trend = "increase"
+            elif diff <= -15:
+                trend = "decrease_strong"
+            elif diff <= -5:
+                trend = "decrease"
+            else:
+                trend = "stable"
 
-                message_count = len(recent_msgs)
+            extra_context = f"""
+CHAT:
+{chat_context}
 
-                # =========================
-                # 🔥 LOGIC SCORE (FIX QUAN TRỌNG)
-                # =========================
-                if message_count == 0:
-                    if yesterday_obj:
-                        # kế thừa + noise nhẹ
-                        score = yesterday_obj.score + random.randint(-2, 2)
-                        score = max(0, min(100, score))
-                    else:
-                        score = 30
-                else:
-                    score = calculate_stress(user, emotion="neutral")
-                print("USER:", user.id)
-                print("DATE:", current_day)
-                print("MESSAGE COUNT:", message_count)
-                print("YESTERDAY:", yesterday_obj.score if yesterday_obj else None)
-                print("SCORE:", score)
-                print("-----")
+META:
+- score_today: {score}
+- score_yesterday: {yesterday_obj.score if yesterday_obj else "N/A"}
+- diff: {diff}
+- trend: {trend}
+- message_count: {message_count}
+- data_level: {data_level}
 
-                # 🔥 diff
-                diff = score - yesterday_obj.score if yesterday_obj else 0
+HƯỚNG DẪN:
+- BẮT BUỘC phải nhắc đến xu hướng stress (tăng/giảm/ổn định)
+- Nếu tăng mạnh → nói rõ có biến động đáng chú ý
+- Nếu giảm → nói theo hướng tích cực
+- Nếu ổn định → nói trạng thái cân bằng
+"""
 
-                # 🔥 data level
-                if message_count == 0:
-                    data_level = "none"
-                elif message_count <= 2:
-                    data_level = "low"
-                elif message_count <= 5:
-                    data_level = "medium"
-                else:
-                    data_level = "high"
-
-                # 🔥 trend
-                if diff >= 15:
-                    trend = "increase_strong"
-                elif diff >= 5:
-                    trend = "increase"
-                elif diff <= -15:
-                    trend = "decrease_strong"
-                elif diff <= -5:
-                    trend = "decrease"
-                else:
-                    trend = "stable"
-
-                # 🔥 AI cảm xúc
-                feel_text = generate_ai_reply(
-                    user=user,
-                    mode="recap_feel"
+            # =============================
+            # 🔥 AI chỉ generate 1 câu cảm xúc
+            # =============================
+            feel_text = generate_ai_reply(
+                user=user,
+                mode="recap_feel"
                 )
+            # =============================
+            # 🔥 TEMPLATE SYSTEM
+            # =============================
 
-                if not feel_text or len(feel_text) < 10:
-                    feel_text = "Hôm đó bạn có vẻ khá yên tĩnh."
-
-                if not feel_text.endswith((".", "!", "?")):
-                    feel_text += "."
-
-                trend_map = {
+            trend_map = {
                     "increase_strong": "áp lực đang tăng lên khá rõ",
                     "increase": "có vẻ áp lực tăng nhẹ",
                     "decrease_strong": "mọi thứ đã dịu lại nhiều",
                     "decrease": "có vẻ bạn đã nhẹ lòng hơn",
                     "stable": "mọi thứ đang khá ổn định"
-                }
+                    }
 
-                trend_text = trend_map.get(trend, "có một chút biến động")
+            trend_text = trend_map.get(trend, "có một chút biến động")
 
-                ai_text = f"""
+            # 👉 fallback nếu AI lỗi
+            if not feel_text or len(feel_text) < 10:
+                feel_text = "Hôm nay có nhiều cảm xúc đan xen."
+
+            # 👉 đảm bảo kết thúc câu
+            if not feel_text.endswith((".", "!", "?")):
+                feel_text += "."
+            ai_text = f"""
 {feel_text}
 
-Hôm đó {trend_text}.
-Bạn vẫn đang cố gắng từng chút một.
-Hôm nay cứ bắt đầu nhẹ nhàng thôi nhé.
+Hôm nay {trend_text}.
+Dù có lúc chưa thoải mái, bạn vẫn đang cố gắng từng chút một.
+Tối nay thử nghỉ ngơi nhẹ một chút nhé.
+Ngày mai cứ bắt đầu chậm thôi, không cần vội.
 """.strip()
+            import random
 
-                # 🔥 UPDATE hoặc CREATE (không bao giờ duplicate)
-                obj, created = DailyStress.objects.update_or_create(
+            endings = [
+    "Mây vẫn ở đây với bạn.",
+    "Không sao đâu, cứ từ từ thôi nhé.",
+    "Bạn không cần phải làm mọi thứ hoàn hảo đâu."
+]
+
+            ending = endings[hash(user.id) % len(endings)]
+            ai_text += "\n" + ending
+
+            print("========== DEBUG AI ==========")
+            print("AI TEXT RAW:\n", repr(ai_text))
+            print("========== END ==========")
+
+            # 🔥 lưu DB
+            obj = DailyStress.objects.filter(
+                user=user,
+                created_at=today
+            ).first()
+
+            if obj:
+                obj.score = score
+                obj.ai_analysis = ai_text
+                obj.save()
+            else:
+                DailyStress.objects.create(
                     user=user,
-                    created_at=current_day,
-                    defaults={
-                        "score": score,
-                        "ai_analysis": ai_text
-                    }
+                    score=score,
+                    ai_analysis=ai_text
                 )
 
-                # 🔥 notification (chỉ cho hôm qua)
-                if current_day == today - timedelta(days=1):
-                    create_notification(
-                        user,
-                        f"Điểm stress hôm qua của bạn là: {score}",
-                        "stress",
-                        target_url=f"/stress/{current_day}/"
-                    )
-
-                current_day += timedelta(days=1)
+            # 🔥 notification (chỉ tóm tắt)
+            create_notification(
+                user,
+                f"Điểm căng thẳng hôm nay của bạn là: {score}, xem chi tiết để biết thêm.",
+                "stress",
+                target_url=f"/stress/{today}/"
+            )
 
         self.stdout.write("DONE DAILY STRESS")
-        

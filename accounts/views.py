@@ -375,3 +375,25 @@ def resend_login_link(request):
     return render(request, "auth/check_login_email.html", {
         "message": "Link mới đã được gửi"
     })
+@require_POST
+def resend_verify_email(request):
+    email = request.POST.get("email")
+
+    user = User.objects.filter(email=email, is_active=False).first()
+
+    if user:
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+
+        verify_link = build_full_url(request, "verify_email", uid, token)
+
+        send_mail(
+            "Xác nhận tài khoản ở MâyAI",
+            f"Link mới của bạn:\n{verify_link}",
+            gmail,
+            [email],
+        )
+
+    return render(request, "auth/check_email.html", {
+        "message": "Nếu email tồn tại, link mới đã được gửi"
+    })

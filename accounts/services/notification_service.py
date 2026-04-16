@@ -45,7 +45,7 @@ def notify_like(user, from_user, feedback):
 
     create_notification(
         user,
-        f"{from_user.username} đã thích feedback của bạn",
+        f"Ai đó đã thích feedback của bạn",
         "like",
         target_url="/feedback/"
     )
@@ -56,14 +56,14 @@ def notify_like(user, from_user, feedback):
 def notify_reply(user, from_user, feedback):
     create_notification(
         user,
-        f" {from_user.username} đã phản hồi feedback của bạn",
+        f" Nhà phát triển đã phản hồi feedback của bạn",
         "reply",
         target_url="/feedback/"
     )
 def notify_heart(user, from_user, feedback):
     create_notification(
         user,
-        f" {from_user.username} đã thả tim feedback của bạn",
+        f" Nhà phát triển đã thả tim feedback của bạn",
         "heart",
         target_url="/feedback/"
     )

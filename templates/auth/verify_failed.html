@@ -10,7 +10,15 @@
         Bạn có thể đăng ký lại hoặc yêu cầu gửi lại email.
     </p>
 
-    <a href="{% url 'signup' %}" class="auth-btn">Đăng ký lại</a>
+    <!-- ✅ resend -->
+    <form method="post" action="{% url 'resend_verify' %}" style="margin-bottom: 12px;">
+        {% csrf_token %}
+        <input type="email" name="email" placeholder="Nhập email của bạn" required class="auth-input">
+        <button type="submit" class="auth-btn">Gửi lại mã xác thực</button>
+    </form>
+
+    <!-- fallback -->
+    <a href="{% url 'signup' %}" class="auth-btn secondary">Đăng ký lại</a>
 
 </div>
 </div>

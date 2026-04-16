@@ -1897,11 +1897,68 @@ body{
   height:40px;
 }
 .chart-scroll{
-      height:auto;
+    height:60vh; /* 👈 chỉnh tại đây */
+    min-height:300px;
   }
 
   .chart-scroll canvas{
-      height:auto !important;
+    height:100% !important;
+    aspect-ratio:auto !important;
+  }
+    /* container full width */
+  .settings-container{
+    margin:0;
+    padding:12px;
+    max-width:100%;
+  }
+
+  .settings-card{
+    margin:0;
+    padding:16px;
+    border-radius:0;
+  }
+
+  /* form stack dọc */
+  .form-row{
+    flex-direction:column;
+  }
+
+  /* input full width */
+  .form-group input,
+  .form-group select{
+    width:100%;
+  }
+
+  /* avatar stack */
+  .avatar-upload{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:10px;
+  }
+
+  .avatar-actions{
+    width:100%;
+    display:flex;
+    gap:10px;
+  }
+
+  .avatar-actions button,
+  .upload-btn{
+    flex:1;
+    text-align:center;
+  }
+
+  /* button full width */
+  .save-btn{
+    width:100%;
+  }
+
+  .delete-btn{
+    width:auto;
+    display:inline-block;
+    padding:6px 10px;
+    font-size:13px;
+    white-space:nowrap;
   }
 }
 @media (min-width:1025px){

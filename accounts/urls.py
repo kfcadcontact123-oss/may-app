@@ -5,7 +5,7 @@ from .views import signup_view
 from .views import profile_settings
 from .views import delete_account
 from .views import profile_view, about_view, verify_email, check_email
-from .views import upload_avatar, resend_login_link
+from .views import upload_avatar, resend_login_link, resend_verify_email
 from .views_notification import *
 from .views import search_user
 from accounts.views import login_view, login_with_token, send_login_link
@@ -59,4 +59,5 @@ urlpatterns = [
     path("login-link/", send_login_link, name="login_link"),
     path("login-token/<uidb64>/<token>/",login_with_token, name="login_with_token"),
     path("resend-login-link/", resend_login_link, name="resend_login_link"),
+    path("resend-verify/", resend_verify_email, name="resend_verify"),
 ]

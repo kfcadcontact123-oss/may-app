@@ -197,52 +197,46 @@
 document.addEventListener("DOMContentLoaded", function(){
 
 let stressData = JSON.parse('{{ stress_data|escapejs }}');
-// =========================
-// FIX NULL → FILL DATA
-// =========================
 let stressLabels = JSON.parse('{{ stress_labels|escapejs }}');
 let avgData = JSON.parse('{{ avg_data|escapejs }}');
 const today = new Date();
 const todayStr =
     String(today.getDate()).padStart(2,'0') + "/" +
     String(today.getMonth()+1).padStart(2,'0');
+
 const todayIndex = stressLabels.indexOf(todayStr);
+function fillStressData(data, todayIndex){
+    let result = [...data];
 
-// =========================
-// FIX NULL (CHUẨN LOGIC)
-// =========================
+    // 🔥 tìm index ngày bắt đầu (first non-null)
+    let firstRealIndex = result.findIndex(v => v !== null);
 
-// =========================
-// FIX NULL (FINAL CHUẨN)
-// =========================
+    if(firstRealIndex === -1) return result;
 
-let firstRealIndex = stressData.findIndex(v => v !== null);
-
-if(firstRealIndex === -1){
-
-    // user chưa có data → chỉ set hôm nay
-    if(todayIndex !== -1){
-        stressData[todayIndex] = 30;
+    // 🔥 nếu ngày join là null ngay trước first data → set = 30
+    if(firstRealIndex > 0 && firstRealIndex <= todayIndex){
+        result[firstRealIndex - 1] = 30;
     }
 
-}else{
+    let last = null;
 
-    // ❗ KHÔNG đụng vào quá khứ
+    for(let i = 0; i < result.length; i++){
 
-    for(let i = firstRealIndex; i <= todayIndex; i++){
+        // ❌ không fill tương lai
+        if(i > todayIndex) continue;
 
-        if(stressData[i] === null){
+        // ❌ bỏ qua trước join
+        if(i < firstRealIndex - 1) continue;
 
-            if(i === firstRealIndex){
-                stressData[i] = 30; // fallback ngày đầu
-            }else{
-                stressData[i] = stressData[i-1];
-            }
+        if(result[i] === null){
+            result[i] = last;
+        } else {
+            last = result[i];
         }
     }
+
+    return result;
 }
-
-
 /* =========================
    ALIGN
 ========================= */
@@ -278,6 +272,7 @@ const aligned = alignTodayCenter(stressLabels, stressData, avgData);
 stressLabels = aligned.labels;
 stressData   = aligned.data;
 avgData      = aligned.avg;
+let displayData = fillStressData(stressData, todayIndex);
 
 /* =========================
    DAY COUNT (FIX CHUẨN)
@@ -285,7 +280,16 @@ avgData      = aligned.avg;
 
 let realData = stressData.filter(v => v !== null);
 
-document.getElementById("day-number").textContent = realData.length;
+// 🔥 tìm ngày bắt đầu (join)
+let firstIndex = displayData.findIndex(v => v !== null);
+
+let dayCount = 0;
+
+if(firstIndex !== -1 && todayIndex !== -1){
+    dayCount = todayIndex - firstIndex + 1;
+}
+
+document.getElementById("day-number").textContent = dayCount;
 
 /* =========================
    PREDICTION
@@ -373,7 +377,7 @@ const chart = new Chart(document.getElementById("stressChart"), {
         datasets:[
             {
                 label:'Stress',
-                data:stressData,
+                data: displayData,
                 spanGaps:true,
                 tension:0.4,
                 borderColor:'#3b82f6',
@@ -448,7 +452,6 @@ const chart = new Chart(document.getElementById("stressChart"), {
         }
     }
 });
-
 
 });
 </script>

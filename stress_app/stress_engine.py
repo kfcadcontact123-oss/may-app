@@ -9,6 +9,7 @@ from google.cloud import aiplatform
 from web_project.settings import GOOGLE_CLOUD_PROJECT
 from chat.services.ai_emotion import init_vertex
 from vertexai.generative_models import GenerativeModel
+from .models import DailyStress
 
 
 # =====================
@@ -141,10 +142,10 @@ def calculate_stress(user, emotion, current_message=None):
     # =====================
     base_map = {
         "neutral": 20,
-        "stress": 45,
-        "sad": 55,
-        "very_sad": 70,
-        "critical": 90,
+        "stress": 55,
+        "sad": 65,
+        "very_sad": 80,
+        "critical": 95,
     }
     now = timezone.now()
     start = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -156,6 +157,21 @@ def calculate_stress(user, emotion, current_message=None):
 
     today_msgs = list(today_msgs_qs.values_list("message", flat=True))
     msg_count = len(today_msgs)
+    # =====================
+    # 🔥 NO MESSAGE → CARRY FORWARD
+    # =====================
+    if msg_count == 0:
+        yesterday = today - timedelta(days=1)
+
+        yesterday_obj = DailyStress.objects.filter(
+            user=user,
+            created_at=yesterday
+        ).first()
+
+        if yesterday_obj:
+            return yesterday_obj.score  # 🔥 giữ nguyên điểm hôm qua
+
+        return 30  # nếu ngày đầu
 
     dprint("TODAY MSGS", {
         "count": msg_count,
@@ -222,30 +238,41 @@ def calculate_stress(user, emotion, current_message=None):
     dprint("AI EMOTION", ai_emotion)
     dprint("AI SCORES", ai)
 
-        # =====================
-    # 🔥 6. MAP → SCORE (FIX SIGN + SCALE)
+    # =====================
+    # 🔥 6. MAP → SCORE (STABLE VERSION)
     # =====================
 
     base = base_map.get(emotion, 20)
 
-    # NEGATIVE (tăng stress)
-    negative_score = (
-        ai["sad"] * 28 +
-        ai["anxiety"] * 24 +
-        ai["anger"] * 14 +
-        ai["critical"] * 40 +
-        ai["self_hate"] * 32
+    # 🔥 giảm sensitivity (tránh nhảy số)
+    intensity_score = (
+        ai["sad"] * 12 +
+        ai["anxiety"] * 10 +
+        ai["anger"] * 6
     )
 
-    # POSITIVE (GIẢM stress - FIX CRITICAL BUG)
-    positive_offset = ai["joy"] * 35
+    # 🔥 sentiment nhẹ hơn (tránh đảo chiều mạnh)
+    sentiment_bonus = (
+        (ai["joy"] * 6) -
+        (ai["sad"] * 6)
+    )   
 
-    message_stress = base + negative_score - positive_offset
-    message_stress = clamp(message_stress, 0, 100)
+    critical_bonus = 30 if ai["critical"] > 0.75 else 0
+    self_hate_bonus = 20 if ai["self_hate"] > 0.65 else 0
+    profanity_bonus = ai["profanity"] * 6
 
 
     # =====================
-    # 7. INERTIA (GIỮ NGUYÊN LOGIC, CHỈ GIẢM SCALE)
+    # 🔥 7. CLAMP (GIỮ NHƯNG HẠ SCALE)
+    # =====================
+
+    intensity_bonus = clamp(intensity_score, 0, 20)
+    sentiment_bonus = clamp(sentiment_bonus, -10, 8)
+    critical_bonus = clamp(critical_bonus, 0, 40)
+    self_hate_bonus = clamp(self_hate_bonus, 0, 30)
+    profanity_bonus = clamp(profanity_bonus, 0, 8)
+    # =====================
+    # 8. INERTIA (BỊ THIẾU)
     # =====================
 
     yesterday = today - timedelta(days=1)
@@ -255,58 +282,81 @@ def calculate_stress(user, emotion, current_message=None):
         created_at__date=yesterday
     ).count()
 
-    inertia_bonus = min(yesterday_msgs * 1.5, 8)
+    inertia_bonus = min(yesterday_msgs * 2, 10)
+
+    # =====================
+    # 🔥 NORMALIZE (SMOOTH SCALE)
+    # =====================
+
+    base_n = base * 0.7
+
+    intensity_n = intensity_bonus * 3.5
+    critical_n = critical_bonus * 1.8
+    self_hate_n = self_hate_bonus * 2.0
+    sentiment_n = (sentiment_bonus + 10) * 2.5
+
+    frequency_n = frequency_bonus * 4
+    trend_n = trend_bonus * 3
+    inertia_n = inertia_bonus * 3
 
 
     # =====================
-    # 8. NORMALIZE INPUT (ĐƯA VỀ 0–100)
+    # 🔥 MESSAGE STRESS (ÍT NHẠY HƠN)
     # =====================
 
-    frequency_n = clamp(frequency_bonus * 8, 0, 100)
-    trend_n = clamp(trend_bonus * 10, 0, 100)
-    inertia_n = clamp(inertia_bonus * 10, 0, 100)
-    message_n = message_stress  # đã clamp
+    message_stress = (
+        intensity_n * 0.28 +
+        critical_n * 0.22 +
+        self_hate_n * 0.18 +
+        sentiment_n * 0.18 +
+        base_n * 0.14
+    )
+
+    message_stress = clamp(message_stress, 0, 100)
 
 
     # =====================
-    # 9. WEIGHTED COMBINE (SUM = 1)
+    # 🔥 SMOOTH THEO HISTORY (QUAN TRỌNG)
     # =====================
 
-    W_MESSAGE = 0.6
-    W_FREQ    = 0.15
-    W_TREND   = 0.15
-    W_INERTIA = 0.10
+    history_factor = clamp(msg_count / 12, 0, 1)
 
-    stress_score = (
-        message_n * W_MESSAGE +
-        frequency_n * W_FREQ +
-        trend_n * W_TREND +
-        inertia_n * W_INERTIA
+    avg_message_stress = (
+        message_stress * 0.6 +
+        base_n * 0.4 * (1 - history_factor)
     )
 
 
     # =====================
-    # 10. SMOOTH HISTORY (SUM = 1)
+    # 🔥 DAILY STRESS (ÍT NOISE HƠN)
     # =====================
 
-    history_factor = clamp(msg_count / 10, 0, 1)
-
     stress_score = (
-        stress_score * history_factor +
-        base * (1 - history_factor)
+        avg_message_stress * 0.65 +
+        frequency_n * 0.12 +
+        trend_n * 0.10 +
+        inertia_n * 0.08 +
+        base_n * 0.05
     )
 
 
     # =====================
-    # 11. HARD RULE (GIỮ NHẸ)
+    # 🔥 HARD FLOOR (GIỮ NHƯNG GIẢM CỨNG)
     # =====================
 
-    if ai["critical"] > 0.85:
-        stress_score = max(stress_score, 75)
+    if emotion in ["very_sad", "critical"]:
+        stress_score = max(stress_score, 65)
+        message_stress = max(message_stress, 70)
 
-    # ❗ FIX QUAN TRỌNG: vui thì phải thấp
-    if ai["joy"] > 0.75 and ai["sad"] < 0.2:
-        stress_score = min(stress_score, 40)
+
+    # =====================
+    # 🔥 SOFT CORRECTION (THAY VÌ HARD)
+    # =====================
+
+    diff = message_stress - stress_score
+
+    # 🔥 dùng tanh để giảm shock (production trick)
+    stress_score += diff * 0.1
 
 
     # =====================

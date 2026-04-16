@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 {% load tz %}
+
 <div class="feedback-page">
     <div class="feedback-container">
 
@@ -27,7 +28,6 @@
         <!-- ADD -->
         <form method="post" action="/feedback/add/" class="feedback-form">
             {% csrf_token %}
-
             <div class="feedback-input-wrap">
                 <textarea name="content"
                           placeholder="Bạn nghĩ gì về hệ thống hôm nay, hãy chia sẻ suy nghĩ ở đây"
@@ -63,16 +63,15 @@
                 <a href="/feedback/dislike/{{ fb.id }}">👎 {{ fb.dislike_count }}</a>
                 <span>🔥 {{ fb.score }}</span>
 
-                <!-- luôn hiển thị -->
-{% if user.id == 1 %}
-    <a href="/feedback/heart/{{ fb.id }}">
-        {% if fb.is_hearted %}❤️{% else %}🤍{% endif %}
-    </a>
-{% else %}
-    <span>
-        {% if fb.is_hearted %}❤️{% else %}🤍{% endif %}
-    </span>
-{% endif %}
+                {% if user.id == 1 %}
+                    <a href="/feedback/heart/{{ fb.id }}">
+                        {% if fb.is_hearted %}❤️{% else %}🤍{% endif %}
+                    </a>
+                {% else %}
+                    <span>
+                        {% if fb.is_hearted %}❤️{% else %}🤍{% endif %}
+                    </span>
+                {% endif %}
 
                 {% if user == fb.user or user.id == 1 %}
                     <a href="/feedback/delete/{{ fb.id }}/" class="delete-btn">Xóa</a>
@@ -82,16 +81,16 @@
             <!-- REPLY FORM -->
             {% if user.id == 1 %}
             <form method="post" action="/feedback/reply/{{ fb.id }}/" class="reply-form">
-    {% csrf_token %}
-    <textarea name="content" placeholder="Trả lời..." required></textarea>
-    <button>Trả lời</button>
-</form>
+                {% csrf_token %}
+                <textarea name="content" placeholder="Trả lời..." required></textarea>
+                <button>Trả lời</button>
+            </form>
             {% endif %}
 
             <!-- REPLIES -->
             {% for r in fb.replies.all %}
             <div class="reply-box">
-                <b><b>{{ r.user.first_name|default:r.user.email }}:</b>:</b> {{ r.content }}
+                <b>{{ r.user.first_name|default:r.user.email }}:</b> {{ r.content }}
 
                 {% if request.user == r.user or request.user.id == 1 %}
                     <a href="{% url 'delete_reply' r.id %}" class="delete-btn">🗑</a>
@@ -106,4 +105,5 @@
 
     </div>
 </div>
+
 {% endblock %}
