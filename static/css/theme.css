@@ -1791,6 +1791,15 @@ body{
   .chatbot{
     flex:1;
     border-radius:0 !important;
+    .chatbot{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  overflow: hidden;
+  height:100%;
+  width:100%;       
+  max-width:100%;
+}
   }
 
   .chat-messages{
