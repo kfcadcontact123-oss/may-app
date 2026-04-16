@@ -4,12 +4,11 @@
 
 <div class="about-container">
 
-    <!-- HEADER -->
+    <!-- HERO -->
     <div class="about-hero">
-        <h1>Chào bạn, mình là Mây ☁️</h1>
+        <h1>Mây – Người bạn đồng hành của bạn</h1>
         <p>
-            Một người bạn đồng hành nhỏ giúp bạn theo dõi cảm xúc
-            và chia sẻ những lúc bạn cần.
+            Không chỉ là một chatbot, Mây giúp bạn hiểu chính mình qua từng ngày.
         </p>
     </div>
 
@@ -17,31 +16,70 @@
     <div class="about-card">
         <h2>Mây là gì?</h2>
         <p>
-            Đây là một nền tảng giúp bạn theo dõi mức độ căng thẳng mỗi ngày,
-            kết hợp với chatbot tâm lý để lắng nghe và đồng hành cùng bạn.
+            Mây là nền tảng giúp bạn theo dõi trạng thái cảm xúc và mức độ căng thẳng mỗi ngày
+            thông qua chính những cuộc trò chuyện của bạn.
         </p>
         <p>
-            Mây không phải bác sĩ, nhưng sẽ luôn cố gắng hiểu bạn một cách nhẹ nhàng nhất.
+            Thay vì ghi chép thủ công, Mây tự động phân tích và hiển thị dữ liệu dưới dạng trực quan,
+            giúp bạn nhìn lại hành trình cảm xúc của mình một cách rõ ràng hơn.
         </p>
+    </div>
+
+    <!-- TÍNH NĂNG -->
+    <div class="about-card">
+        <h2>Mây có thể làm gì?</h2>
+
+        <ul class="feature-list">
+            <li> Trò chuyện như một người bạn, lắng nghe mọi tâm sự</li>
+            <li> Phân tích mức độ stress dựa trên tin nhắn hằng ngày</li>
+            <li> Hiển thị biểu đồ cảm xúc theo thời gian</li>
+            <li> Tóm tắt và phản hồi cảm xúc bằng AI</li>
+            <li> Nhắc nhở và giúp bạn nhận ra sự thay đổi của bản thân</li>
+        </ul>
     </div>
 
     <!-- VIDEO -->
     <div class="about-card">
-        <h2>Hướng dẫn sử dụng web/ứng dụng</h2>
+        <h2>Video hướng dẫn sử dụng trang web (sẽ cập nhật sau)</h2>
 
-        <div class="video-wrapper">
-            <!-- 👉 bạn thay iframe vào đây -->
-            <iframe 
-                src="https://www.youtube.com/embed/VIDEO_ID"
-                frameborder="0"
-                allowfullscreen>
-            </iframe>
-        </div>
+
+    <!-- NHÀ PHÁT TRIỂN -->
+    <div class="about-card">
+        <h2>Về nhà phát triển</h2>
+
+        <p>
+            Hiện tại là sinh viên của <b>Đại học Bách khoa Hà Nội</b>, 
+            thuộc trường <b>Công Nghệ Thông Tin và Truyền Thông</b>, 
+            ngành <b>Khoa học Máy tính (IT1)</b>.
+        </p>
+    </div>
+
+    <!-- TÂM SỰ -->
+    <div class="about-card">
+        <h2>Lời chia sẻ</h2>
+
+        <p class="quote">
+            "Sản phẩm được làm ra để giúp bạn chữa lành trong cuộc sống bộn bề mệt mỏi.
+            Mây ở đó, như một người bạn tâm sự với chính bạn.
+            Không chỉ là một hệ thống chatbot khô khan,
+            Mây có thể trò chuyện với nhiều lứa tuổi,
+            ở bên bạn khi vui, buồn, hay chỉ đơn giản là những lúc bạn không biết làm gì.
+            Mây vẫn sẽ ở đó để lắng nghe và đồng hành cùng bạn."
+        </p>
+    </div>
+
+    <!-- NOTE -->
+    <div class="about-card subtle">
+        <p>
+            Vì đây là sản phẩm đầu tay, nên việc sai sót là khó tránh khỏi.
+            Nếu bạn có bất kỳ góp ý hoặc thắc mắc nào,
+            hãy gửi tại mục <b>Góp ý</b> hoặc liên hệ trực tiếp với mình nhé.
+        </p>
     </div>
 
     <!-- LIÊN HỆ -->
     <div class="about-card">
-        <h2>Liên hệ với nhà phát triển của mây tại đây nhé.</h2>
+        <h2>Liên hệ</h2>
 
         <div class="contact-list">
             <p>Email: <b>kfcadcontact123@gmail.com</b></p>
@@ -95,6 +133,33 @@
 .about-card h2{
     margin-bottom:10px;
     font-size:18px;
+}
+
+/* feature list */
+
+.feature-list{
+    padding-left:16px;
+    line-height:1.7;
+}
+
+.feature-list li{
+    margin-bottom:6px;
+}
+
+/* quote */
+
+.quote{
+    font-style:italic;
+    line-height:1.6;
+    color:#334155;
+}
+
+/* subtle note */
+
+.about-card.subtle{
+    background:#f1f5f9;
+    font-size:14px;
+    color:#475569;
 }
 
 /* video */
