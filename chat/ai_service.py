@@ -15,7 +15,7 @@ from vertexai.generative_models import GenerativeModel
 # =============================
 vertexai.init(
     project=settings.GOOGLE_CLOUD_PROJECT,
-    location="us-central1"
+    location="asia-southeast1"
 )
 
 MODEL_NAME = "gemini-2.5-flash"
