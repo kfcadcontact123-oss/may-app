@@ -125,7 +125,6 @@ def home(request):
     # USER + CHAT
     # =====================================
 
-    suggested_users = User.objects.exclude(id=user.id).select_related('usermemory')[:5]
     messages = ChatMessage.objects.filter(
         user=user
     ).order_by("created_at")
