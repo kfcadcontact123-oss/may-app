@@ -210,7 +210,7 @@ Mây:
         response = model.generate_content(
             prompt,
             generation_config={
-        "max_output_tokens": 1024,   # 🔥 TĂNG MẠNH
+        "max_output_tokens": 2500,   # 🔥 TĂNG MẠNH
         "temperature": 0.7,
         "top_p": 0.95,
         "candidate_count": 1,        # 🔥 QUAN TRỌNG
