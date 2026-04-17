@@ -15,7 +15,7 @@ from vertexai.generative_models import GenerativeModel
 # =============================
 vertexai.init(
     project=settings.GOOGLE_CLOUD_PROJECT,
-    location="asia-southeast1"
+    location="us-central1"
 )
 
 MODEL_NAME = "gemini-2.5-flash"
@@ -210,7 +210,7 @@ Mây:
         response = model.generate_content(
             prompt,
             generation_config={
-        "max_output_tokens": 2500,   # 🔥 TĂNG MẠNH
+        "max_output_tokens": 1500,   # 🔥 TĂNG MẠNH
         "temperature": 0.7,
         "top_p": 0.95,
         "candidate_count": 1,        # 🔥 QUAN TRỌNG
