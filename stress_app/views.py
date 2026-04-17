@@ -145,7 +145,8 @@ def home(request):
     if query:
         suggested_users = suggested_users.filter(
             Q(username__icontains=query)|
-            Q(email__icontains=query)
+            Q(email__icontains=query)|
+        Q(first_name__icontains=query)
     )
 
     suggested_users = suggested_users[:5]
